@@ -1,5 +1,3 @@
-# coding: utf-8
-# Your code here!
 import socket
 import subprocess
 import numpy as np
@@ -14,24 +12,24 @@ print(data)
 
 #ランキングにスコアを追加
 def add_score():
-    1
+    pass
 #ランキングデータをクライアントに送信
 def return_ranking():
-    0
+    pass
 #CSVにランキングを保存
 def save_ranking():
-    1
+    pass
 #CSVのランキングを取得
 def load_csv_ranking():
-    4
+    pass
 #機械学習にデータを送りスコアを得る
 def get_scores():
-    4
+    pass
     
 #ランキングを求める
 def calc_rankng():
-    5
+    pass
 
 #クライアントにスコアを送る
 def send_score():
-    77s
+    pass
