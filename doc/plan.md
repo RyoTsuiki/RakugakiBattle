@@ -107,3 +107,12 @@ self.theme (String) # お題 部屋を締め切り, ゲームを開始する前�
 検出結果を Python3 の dict(辞書) 形式で返す  
 {"label":score}
 
+### 参考文献
+[Quiita](https://qiita.com/massie_g/items/a2bcfac4fed66b1b0717)
+
+### memo
+検出開始も検出結果を返すも一つの関数で行う  
+引数:画像のパス
+戻り値:{"label":score}
+/python/darknet.py を参考に作る 
+
