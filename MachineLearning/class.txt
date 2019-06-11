@@ -1,0 +1,345 @@
+aircraft carrier,空母
+airplane,飛行機
+alarm clock,目覚まし時計
+ambulance,救急車
+angel,天使
+animal migration,動物の移動
+ant,蟻
+anvil,アンビル
+apple,林檎
+arm,腕
+asparagus,アスパラガス
+axe,斧
+backpack,バックパック
+banana,バナナ
+bandage,包帯
+barn,納屋
+baseball,野球
+baseball bat,野球用バット
+basket,バスケット
+basketball,バスケットボール
+bat,コウモリ
+bathtub,バスタブ
+beach,ビーチ
+bear,くま
+beard,あごひげ
+bed,ベッド
+bee,蜂
+belt,ベルト
+bench,ベンチ
+bicycle,自転車
+binoculars,双眼鏡
+bird,鳥
+birthday cake,誕生日ケーキ
+blackberry,ブラックベリー
+blueberry,ブルーベリー
+book,本
+boomerang,ブーメラン
+bottlecap,瓶のキャップ
+bowtie,ちょうネクタイ
+bracelet,ブレスレット
+brain,脳
+bread,パン
+bridge,ブリッジ
+broccoli,ブロッコリ
+broom,ほうき
+bucket,バケツ
+bulldozer,ブルドーザー
+bus,バス
+bush,ブッシュ
+butterfly,バタフライ
+cactus,カクタス
+cake,ケーキ
+calculator,電卓
+calendar,カレンダー
+camel,キャメル
+camera,カメラ
+camouflage,迷彩
+campfire,キャンプファイヤー
+candle,キャンドル
+cannon,大砲
+canoe,カヌー
+car,車
+carrot,にんじん
+castle,城
+cat,ネコ
+ceiling fan,天井ファン
+cello,チェロ
+cell phone,携帯電話
+chair,椅子
+chandelier,シャンデリア
+church,教会
+circle,サークル
+clarinet,クラリネット
+clock,クロック
+cloud,雲
+coffee cup,コーヒーカップ
+compass,コンパス
+computer,コンピューター
+cookie,クッキー
+cooler,クーラー
+couch,ソファー
+cow,牛
+crab,カニ
+crayon,クレヨン
+crocodile,クロコダイル
+crown,クラウン
+cruise ship,クルーズ船
+cup,カップ
+diamond,ダイヤモンド
+dishwasher,食器洗い機
+diving board,ダイビングボード
+dog,犬
+dolphin,イルカ
+donut,ドーナツ
+door,ドア
+dragon,ドラゴン
+dresser,ドレッサー
+drill,ドリル
+drums,ドラム
+duck,アヒル
+dumbbell,ダンベル
+ear,耳
+elbow,肘
+elephant,象
+envelope,エンベロープ
+eraser,消しゴム
+eye,眼
+eyeglasses,めがね
+face,面
+fan,ファン
+feather,フェザー
+fence,フェンス
+finger,指
+fire hydrant,消火栓
+fireplace,暖炉
+firetruck,消防車
+fish,魚
+flamingo,フラミンゴ
+flashlight,懐中電灯
+flip flops,ビーチサンダル
+floor lamp,フロアランプ
+flower,花
+flying saucer,空飛ぶ円盤
+foot,足
+fork,フォーク
+frog,カエル
+frying pan,フライパン
+garden,庭園
+garden hose,庭のホース
+giraffe,キリン
+goatee,あごひげ
+golf club,ゴルフクラブ
+grapes,ぶどう
+grass,草
+guitar,ギター
+hamburger,ハンバーガー
+hammer,ハンマー
+hand,ハンド
+harp,ハープ
+hat,帽子
+headphones,ヘッドホン
+hedgehog,ハリネズミ
+helicopter,ヘリコプター
+helmet,ヘルメット
+hexagon,六角形
+hockey puck,アイスホッケー用パック
+hockey stick,ホッケースティック
+horse,うま
+hospital,病院
+hot air balloon,熱気球
+hot dog,ホットドッグ
+hot tub,ホットタブ
+hourglass,砂時計
+house,家
+house plant,家の植物
+hurricane,ハリケーン
+ice cream,アイスクリーム
+jacket,ジャケット
+jail,刑務所
+kangaroo,カンガルー
+key,キー
+keyboard,キーボード
+knee,膝
+knife,ナイフ
+ladder,ラダー
+lantern,灯籠
+laptop,ノートパソコン
+leaf,葉
+leg,脚
+light bulb,電球
+lighter,ライター
+lighthouse,灯台
+lightning,ライトニング
+line,ライン
+lion,ライオン
+lipstick,口紅
+lobster,ロブスター
+lollipop,ロリポップ
+mailbox,メールボックス
+map,地図
+marker,マーカー
+matches,マッチ
+megaphone,メガホン
+mermaid,マーメイド
+microphone,マイクロフォン
+microwave,電子レンジ
+monkey,モンキー
+moon,月
+mosquito,蚊
+motorbike,バイク
+mountain,山
+mouse,マウス
+moustache,口ひげ
+mouth,口
+mug,マグ
+mushroom,キノコ
+nail,爪
+necklace,ネックレス
+nose,鼻
+ocean,海洋
+octagon,八角形
+octopus,たこ
+onion,玉ねぎ
+oven,オーブン
+owl,ふくろう
+paintbrush,絵筆
+paint can,ペンキの缶
+palm tree,ヤシの木
+panda,パンダ
+pants,ズボン
+paper clip,ペーパークリップ
+parachute,パラシュート
+parrot,オウム
+passport,パスポート
+peanut,落花生
+pear,梨
+peas,豆
+pencil,鉛筆
+penguin,ペンギン
+piano,ピアノ
+pickup truck,ピックアップトラック
+picture frame,額縁
+pig,豚
+pillow,枕
+pineapple,パイナップル
+pizza,ピザ
+pliers,ペンチ
+police car,警察車
+pond,池
+pool,プール
+popsicle,アイスキャンデー
+postcard,はがき
+potato,じゃがいも
+power outlet,電源コンセント
+purse,財布
+rabbit,ウサギ
+raccoon,ラクーン
+radio,無線
+rain,雨
+rainbow,虹
+rake,レーキ
+remote control,リモコン
+rhinoceros,サイ
+rifle,ライフル
+river,川
+roller coaster,ジェットコースター
+rollerskates,ローラースケート
+sailboat,ヨット
+sandwich,サンドイッチ
+saw,見た
+saxophone,サックス
+school bus,スクールバス
+scissors,はさみ
+scorpion,サソリ
+screwdriver,ドライバー
+sea turtle,ウミガメ
+see saw,見た
+shark,鮫
+sheep,羊
+shoe,靴
+shorts,ショーツ
+shovel,シャベル
+sink,シンク
+skateboard,スケートボード
+skull,頭蓋骨
+skyscraper,超高層ビル
+sleeping bag,寝袋
+smiley face,笑顔
+snail,かたつむり
+snake,ヘビ
+snorkel,スノーケル
+snowflake,スノーフレーク
+snowman,雪だるま
+soccer ball,サッカーボール
+sock,靴下
+speedboat,スピードボート
+spider,クモ
+spoon,スプーン
+spreadsheet,スプレッドシート
+square,平方
+squiggle,くねくね
+squirrel,リス
+stairs,階段
+star,星
+steak,ステーキ
+stereo,ステレオ
+stethoscope,聴診器
+stitches,ステッチ
+stop sign,一時停止標識
+stove,レンジ
+strawberry,イチゴ
+streetlight,街路灯
+string bean,いんげんまめ
+submarine,潜水艦
+suitcase,スーツケース
+sun,太陽
+swan,白鳥
+sweater,セーター
+swing set,スイングセット
+sword,剣
+syringe,注射器
+table,表
+teapot,ティーポット
+teddy-bear,テディベア
+telephone,電話
+television,テレビ
+tennis racquet,テニスラケット
+tent,テント
+The Eiffel Tower,エッフェル塔
+The Great Wall of China,万里の長城
+The Mona Lisa,モナリザ
+tiger,虎
+toaster,トースター
+toe,つま先
+toilet,トイレ
+tooth,歯
+toothbrush,歯ブラシ
+toothpaste,歯磨き粉
+tornado,竜巻
+tractor,トラクター
+traffic light,信号機
+train,列車
+tree,木
+triangle,三角形
+trombone,トロンボーン
+truck,トラック
+trumpet,トランペット
+t-shirt,Tシャツ
+umbrella,傘
+underwear,下着
+van,バン
+vase,花瓶
+violin,バイオリン
+washing machine,洗濯機
+watermelon,スイカ
+waterslide,ウォータースライド
+whale,鯨
+wheel,ホイール
+windmill,風車
+wine bottle,ワインボトル
+wine glass,ワイングラス
+wristwatch,腕時計
+yoga,ヨガ
+zebra,シマウマ
+zigzag,ジグザグ
