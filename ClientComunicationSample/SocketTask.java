@@ -1,4 +1,8 @@
+<<<<<<< HEAD:ClientComunicationSample/SocketTask.java
 ﻿import java.io.DataInputStream;
+=======
+import java.io.DataInputStream;
+>>>>>>> 3ec74cc22f58931a351e11ba3884cf6821486355:ClientComunicationSample/ChatClientStreamTask.java
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
