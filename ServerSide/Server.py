@@ -5,14 +5,21 @@ from tinydb import TinyDB, Query
 import hashlib
 import random
 import subprocess
+import string
 
+STARTGAME       = "start_game"
+ENDGAME         = "end_game"
+MLPATH          = "python MLTest.py"
+RESULT          = "result"
+GAMEDATA        = "game_data"
+ERROR           = "error"
 #サーバ側のホストとポート
-HOST, PORT = "", 12345
+HOST, PORT      = "", 12345
 #お題データのファイル名
-ODAI_TEXT_NAME = "odai.txt"
+ODAI_TEXT_NAME  = "odai.txt"
 #お題を取得
 odai_txt = open(ODAI_TEXT_NAME, "r")
-ODAI = odai_txt.read().splitlines()
+ODAI            = odai_txt.read().splitlines()
 #データベースの選択
 DB = TinyDB('tiny_db.json')
 print(ODAI[random.randint(0, (len(ODAI)-1))])
@@ -27,6 +34,14 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #self.client_address　(IPアドレス,ポート番号)
     #self.client クライアント
 
+    #IDがかぶってなければDBに追加
+    def __search_and_insert_ID(self, id_kouho):
+        return True
+        
+    #ランダムな文字列を作成
+    def __meke_random_string(self, length):
+        return("".join([random.choice(string.ascii_letters + string.digits) for i in range(length)]))
+
 
     #お題を決める
     def __decide_odai(self):
@@ -35,19 +50,24 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #ユーザーのIDを求める
     def __create_id(self):
-        return ("test")
+        while True:
+            id_kouho = SocketHandler.__meke_random_string(self, 8)
+            if(SocketHandler.__search_and_insert_ID(self, id_kouho) == True):
+                break
+        return (id_kouho)
 
     #結果を送信
     def __send_result(self, rank):
-        my_message = "result,"
+        my_message = RESULT + ","
         my_message += str(self.score) + ","
         my_message += str(rank)
+
         self.client.sendall(my_message.encode())
 
     #ゲームデータメッセージを送る
     def __send_game_data(self):
         #メッセージ作成（game_data, お題, ID）
-        my_message = "game_data,"
+        my_message = GAMEDATA + ","
         my_message += SocketHandler.__decide_odai(self) + ","
         my_message += self.id 
 
@@ -59,8 +79,13 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        score = subprocess.check_output('python MLTest.py img_path').decode('utf-8').strip()        
+        cmd = MLPATH + " " + img_path
+        score = subprocess.check_output(cmd).decode('utf-8').strip()        
         return(score)
+
+    def __send_error(self, error):
+        my_message = ERROR + ", " + error
+        self.client.sendall(my_message.encode())
         
     #データベース登録
     def __regist_DB(self):
@@ -79,19 +104,17 @@ class SocketHandler(socketserver.BaseRequestHandler):
         messages = message.split(",")
         reqest = messages[0]
 
-        if reqest == "start_game"   : 
+        if reqest == STARTGAME: 
             self.name = messages[1]
             SocketHandler.__send_game_data(self)
 
-        elif reqest == "end_game"   :
+        elif reqest == ENDGAME:
             data = "test"
             SocketHandler.__mae_syori(self, data)
             img_path = "" + self.id + ".jpg"
-
             print(str(self.client_address) + " -sendML- " + img_path)
             self.score = SocketHandler.__send_ML(self, img_path)
             print(str(self.client_address) + " -score- " + str(self.score))
-
             SocketHandler.__ato_syori(self, data)
             SocketHandler.__regist_DB(self)
             rank = SocketHandler.__search_rank_from_DB(self)
@@ -108,7 +131,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
         while(True):
             message = self.client.recv(4096).decode('utf-8').strip()
             print(str(self.client_address) + " - " + message)
-
             SocketHandler.__Interpretation_message(self, message)
             #メッセージがなければ終了
             if message == "":
@@ -128,7 +150,7 @@ if __name__ == "__main__":
 
 
 
-    
+
 ftp = FTP(
     "e",
     "pee",
