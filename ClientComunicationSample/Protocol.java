@@ -1,5 +1,3 @@
-package jp.ac.meijo_u.id150441087.chat;
-
 public class Protocol {
 	public static final String STARTGAME 		= "start_game";
 	public static final String ENDGAME 		= "end_game";
