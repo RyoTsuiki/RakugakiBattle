@@ -1,6 +1,4 @@
-package jp.ac.meijo_u.id150441087.chat;
 import java.io.DataOutputStream;
-
 import javafx.concurrent.Task;
 
 public class ChatClientWriteTask extends Task<Void> {	// callメソッドの戻り値をVoid型になるように宣言
