@@ -1,11 +1,4 @@
-/*
- * 学籍番号：150441087
- * 氏名　　：對木　良
- * クラス　：B
- */
-package jp.ac.meijo_u.id150441087.chat;
-
-import java.io.DataInputStream;
+﻿import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +6,7 @@ import java.net.Socket;
 
 import javafx.concurrent.Task;
 
-public class ChatClientStreamTask extends Task<Void> {	// callメソッドの戻り値をVoid型になるように宣言
+public class SocketTask extends Task<Void> {	// callメソッドの戻り値をVoid型になるように宣言
 	/** ipアドレス、ポート*/
 	private String 				ip;
 	private String 				port;
@@ -23,11 +16,11 @@ public class ChatClientStreamTask extends Task<Void> {	// callメソッドの戻
 	private DataOutputStream 		dos = null;
 
 	/**送信用タスク、呼び出し元*/
-	private ChatClientWriteTask 	writeTask;
+	public SocketWriteTask 		writer;
 	private ChatClientController 	root;
 
 	//コンストラクタで値を初期化
-	public ChatClientStreamTask(String ip, String port, ChatClientController root) {
+	public SocketTask(String ip, String port, ChatClientController root) {
 		this.ip 	= ip;
 		this.port 	= port;
 		this.root 	= root;
@@ -43,8 +36,8 @@ public class ChatClientStreamTask extends Task<Void> {	// callメソッドの戻
 		    break;
 		case Protocol.RESULT:
 		    // 式の値と値Bが一致したときの処理
-			int score 	= Integer.parseInt(messages[1]);
-			int rank 	= Integer.parseInt(messages[2]);
+			int 	score 	= Integer.parseInt(messages[1]);
+			String 	rank 	= messages[2];
 		    break;
 		default:
 		    // 式の値がどのcaseの値とも一致しなかったときの処理
@@ -69,11 +62,11 @@ public class ChatClientStreamTask extends Task<Void> {	// callメソッドの戻
 			dos = new DataOutputStream(socket.getOutputStream());
 
 			//送信用スレッド作成、実行
-			writeTask = new ChatClientWriteTask(dos);
-			Thread thread = new Thread(writeTask);
+			writer = new SocketWriteTask(dos);
+			Thread thread = new Thread(writer);
 			thread.setDaemon(true);
 			thread.start();
-
+			System.out.println("connected" + " " + ip);
 			//受信するデータを格納する配列
 			byte[] bytesMessage = new byte[4098];
 
@@ -97,7 +90,7 @@ public class ChatClientStreamTask extends Task<Void> {	// callメソッドの戻
 			if (socket != null) {
 				try {
 					//送信スレッドの終了
-					writeTask.cancel();
+					writer.cancel();
 					//ソケットを閉じる
 					socket.close();
 				} catch (IOException e) {

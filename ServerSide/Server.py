@@ -13,6 +13,7 @@ MLPATH          = "python MLTest.py"
 RESULT          = "result"
 GAMEDATA        = "game_data"
 ERROR           = "error"
+KARI            = 404
 #サーバ側のホストとポート
 HOST, PORT      = "", 12345
 #お題データのファイル名
@@ -56,14 +57,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 break
         return (id_kouho)
 
-    #結果を送信
-    def __send_result(self, rank):
-        my_message = RESULT + ","
-        my_message += str(self.score) + ","
-        my_message += str(rank)
-
-        self.client.sendall(my_message.encode())
-
     #ゲームデータメッセージを送る
     def __send_game_data(self):
         #メッセージ作成（game_data, お題, ID）
@@ -73,16 +66,15 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
         self.client.sendall(my_message.encode())
 
-    #前処理
-    def __mae_syori(self, data):
-        pass
+    #結果を送信
+    def __send_result(self, rank):
+        my_message = RESULT + ","
+        my_message += str(self.score) + ","
+        my_message += str(rank)
 
-    #推論機に画像のpathを与えてスコアを得る
-    def __send_ML(self, img_path):
-        cmd = MLPATH + " " + img_path
-        score = subprocess.check_output(cmd).decode('utf-8').strip()        
-        return(score)
+        self.client.sendall(my_message.encode())
 
+    #エラーを送信
     def __send_error(self, error):
         my_message = ERROR + ", " + error
         self.client.sendall(my_message.encode())
@@ -93,7 +85,17 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #データベースから順位を求める
     def __search_rank_from_DB(self):
+        return KARI
+
+    #前処理
+    def __mae_syori(self, data):
         pass
+
+    #推論機に画像のpathを与えてスコアを得る
+    def __send_ML(self, img_path):
+        cmd = MLPATH + " " + img_path
+        score = subprocess.check_output(cmd).decode('utf-8').strip()        
+        return(score)
 
     #後処理
     def __ato_syori(self, data):
@@ -120,6 +122,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
             rank = SocketHandler.__search_rank_from_DB(self)
             SocketHandler.__send_result(self, rank)
             
+        else: 
+            SocketHandler.__send_error(self,"")
+
     #クライアントが接続してきたら
     def handle(self):
         #通信先のクライアント
