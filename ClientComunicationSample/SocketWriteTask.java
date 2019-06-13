@@ -1,5 +1,3 @@
-package com.example.myapplication;
-
 import java.io.*;
 
 public class SocketWriteTask implements Runnable {	// callメソッドの戻り値をVoid型になるように宣言
