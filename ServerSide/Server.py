@@ -12,6 +12,7 @@ MLPATH          = "python MLTest.py"
 RESULT          = "result"
 GAMEDATA        = "game_data"
 ERROR           = "error"
+FINISH          = "finish"
 KARI            = 404
 #サーバ側のホストとポート
 HOST, PORT      = "", 12345
