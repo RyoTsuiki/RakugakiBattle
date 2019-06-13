@@ -1,5 +1,3 @@
-package com.example.myapplication;
-
 public class Protocol {
 	public static final String STARTGAME 	= "start_game";
 	public static final String ENDGAME 		= "end_game";
