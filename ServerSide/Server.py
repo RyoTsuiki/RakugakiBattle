@@ -1,7 +1,6 @@
 import socketserver
 from ftplib import FTP
 import socket
-from tinydb import TinyDB, Query
 import hashlib
 import random
 import subprocess
@@ -19,10 +18,9 @@ HOST, PORT      = "", 12345
 #お題データのファイル名
 ODAI_TEXT_NAME  = "odai.txt"
 #お題を取得
-odai_txt = open(ODAI_TEXT_NAME, "r")
+odai_txt        = open(ODAI_TEXT_NAME, "r")
 ODAI            = odai_txt.read().splitlines()
 #データベースの選択
-DB = TinyDB('tiny_db.json')
 print(ODAI[random.randint(0, (len(ODAI)-1))])
 
 
