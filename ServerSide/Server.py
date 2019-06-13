@@ -20,8 +20,7 @@ ODAI_TEXT_NAME  = "odai.txt"
 #お題を取得
 odai_txt        = open(ODAI_TEXT_NAME, "r")
 ODAI            = odai_txt.read().splitlines()
-#データベースの選択
-print(ODAI[random.randint(0, (len(ODAI)-1))])
+
 
 
 class SocketHandler(socketserver.BaseRequestHandler):
