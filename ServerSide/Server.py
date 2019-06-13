@@ -1,7 +1,6 @@
 import socketserver
 from ftplib import FTP
 import socket
-from tinydb import TinyDB, Query
 import hashlib
 import random
 import subprocess
@@ -14,42 +13,40 @@ RESULT          = "result"
 GAMEDATA        = "game_data"
 ERROR           = "error"
 KARI            = 404
-#ƒT[ƒo‘¤‚ÌƒzƒXƒg‚Æƒ|[ƒg
+#ã‚µãƒ¼ãƒå´ã®ãƒ›ã‚¹ãƒˆã¨ãƒãƒ¼ãƒˆ
 HOST, PORT      = "", 12345
-#‚¨‘èƒf[ƒ^‚Ìƒtƒ@ƒCƒ‹–¼
+#ãŠé¡Œãƒ‡ãƒ¼ã‚¿ã®ãƒ•ã‚¡ã‚¤ãƒ«å
 ODAI_TEXT_NAME  = "odai.txt"
-#‚¨‘è‚ğæ“¾
-odai_txt = open(ODAI_TEXT_NAME, "r")
+#ãŠé¡Œã‚’å–å¾—
+odai_txt        = open(ODAI_TEXT_NAME, "r")
 ODAI            = odai_txt.read().splitlines()
-#ƒf[ƒ^ƒx[ƒX‚Ì‘I‘ğ
-DB = TinyDB('tiny_db.json')
-print(ODAI[random.randint(0, (len(ODAI)-1))])
+
 
 
 class SocketHandler(socketserver.BaseRequestHandler):
 
     #self
-    #self.score “¾“_
-    #self.name ƒ†[ƒU[–¼
-    #self.id ƒ†[ƒU[ID
-    #self.client_address@(IPƒAƒhƒŒƒX,ƒ|[ƒg”Ô†)
-    #self.client ƒNƒ‰ƒCƒAƒ“ƒg
+    #self.score å¾—ç‚¹
+    #self.name ãƒ¦ãƒ¼ã‚¶ãƒ¼å
+    #self.id ãƒ¦ãƒ¼ã‚¶ãƒ¼ID
+    #self.client_addressã€€(IPã‚¢ãƒ‰ãƒ¬ã‚¹,ãƒãƒ¼ãƒˆç•ªå·)
+    #self.client ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆ
 
-    #ID‚ª‚©‚Ô‚Á‚Ä‚È‚¯‚ê‚ÎDB‚É’Ç‰Á
+    #IDãŒã‹ã¶ã£ã¦ãªã‘ã‚Œã°DBã«è¿½åŠ 
     def __search_and_insert_ID(self, id_kouho):
         return True
         
-    #ƒ‰ƒ“ƒ_ƒ€‚È•¶š—ñ‚ğì¬
+    #ãƒ©ãƒ³ãƒ€ãƒ ãªæ–‡å­—åˆ—ã‚’ä½œæˆ
     def __meke_random_string(self, length):
         return("".join([random.choice(string.ascii_letters + string.digits) for i in range(length)]))
 
 
-    #‚¨‘è‚ğŒˆ‚ß‚é
+    #ãŠé¡Œã‚’æ±ºã‚ã‚‹
     def __decide_odai(self):
         odai_index = random.randint(0, (len(ODAI) - 1))
         return( ODAI[odai_index] )
 
-    #ƒ†[ƒU[‚ÌID‚ğ‹‚ß‚é
+    #ãƒ¦ãƒ¼ã‚¶ãƒ¼ã®IDã‚’æ±‚ã‚ã‚‹
     def __create_id(self):
         while True:
             id_kouho = SocketHandler.__meke_random_string(self, 8)
@@ -57,16 +54,16 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 break
         return (id_kouho)
 
-    #ƒQ[ƒ€ƒf[ƒ^ƒƒbƒZ[ƒW‚ğ‘—‚é
+    #ã‚²ãƒ¼ãƒ ãƒ‡ãƒ¼ã‚¿ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’é€ã‚‹
     def __send_game_data(self):
-        #ƒƒbƒZ[ƒWì¬igame_data, ‚¨‘è, IDj
+        #ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ä½œæˆï¼ˆgame_data, ãŠé¡Œ, IDï¼‰
         my_message = GAMEDATA + ","
         my_message += SocketHandler.__decide_odai(self) + ","
         my_message += self.id 
 
         self.client.sendall(my_message.encode())
 
-    #Œ‹‰Ê‚ğ‘—M
+    #çµæœã‚’é€ä¿¡
     def __send_result(self, rank):
         my_message = RESULT + ","
         my_message += str(self.score) + ","
@@ -74,34 +71,34 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
         self.client.sendall(my_message.encode())
 
-    #ƒGƒ‰[‚ğ‘—M
+    #ã‚¨ãƒ©ãƒ¼ã‚’é€ä¿¡
     def __send_error(self, error):
         my_message = ERROR + ", " + error
         self.client.sendall(my_message.encode())
         
-    #ƒf[ƒ^ƒx[ƒX“o˜^
+    #ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ç™»éŒ²
     def __regist_DB(self):
         pass
 
-    #ƒf[ƒ^ƒx[ƒX‚©‚ç‡ˆÊ‚ğ‹‚ß‚é
+    #ãƒ‡ãƒ¼ã‚¿ãƒ™ãƒ¼ã‚¹ã‹ã‚‰é †ä½ã‚’æ±‚ã‚ã‚‹
     def __search_rank_from_DB(self):
         return KARI
 
-    #‘Oˆ—
+    #å‰å‡¦ç†
     def __mae_syori(self, data):
         pass
 
-    #„˜_‹@‚É‰æ‘œ‚Ìpath‚ğ—^‚¦‚ÄƒXƒRƒA‚ğ“¾‚é
+    #æ¨è«–æ©Ÿã«ç”»åƒã®pathã‚’ä¸ãˆã¦ã‚¹ã‚³ã‚¢ã‚’å¾—ã‚‹
     def __send_ML(self, img_path):
         cmd = MLPATH + " " + img_path
         score = subprocess.check_output(cmd).decode('utf-8').strip()        
         return(score)
 
-    #Œãˆ—
+    #å¾Œå‡¦ç†
     def __ato_syori(self, data):
         pass
 
-    #‘—‚ç‚ê‚Ä‚«‚½ƒƒbƒZ[ƒW‚ğ‰ğß‚·‚é
+    #é€ã‚‰ã‚Œã¦ããŸãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’è§£é‡ˆã™ã‚‹
     def __Interpretation_message(self, message):
         messages = message.split(",")
         reqest = messages[0]
@@ -125,19 +122,19 @@ class SocketHandler(socketserver.BaseRequestHandler):
         else: 
             SocketHandler.__send_error(self,"")
 
-    #ƒNƒ‰ƒCƒAƒ“ƒg‚ªÚ‘±‚µ‚Ä‚«‚½‚ç
+    #ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆãŒæ¥ç¶šã—ã¦ããŸã‚‰
     def handle(self):
-        #’ÊMæ‚ÌƒNƒ‰ƒCƒAƒ“ƒg
+        #é€šä¿¡å…ˆã®ã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆ
         self.client = self.request
         self.id = SocketHandler.__create_id(self)
         print("connected" + str(self.client_address))
 
-        #ƒƒbƒZ[ƒW‚ğó‚¯æ‚é
+        #ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å—ã‘å–ã‚‹
         while(True):
             message = self.client.recv(4096).decode('utf-8').strip()
             print(str(self.client_address) + " - " + message)
             SocketHandler.__Interpretation_message(self, message)
-            #ƒƒbƒZ[ƒW‚ª‚È‚¯‚ê‚ÎI—¹
+            #ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ãŒãªã‘ã‚Œã°çµ‚äº†
             if message == "":
                 break
 
@@ -161,5 +158,5 @@ ftp = FTP(
     "pee",
     passwd="pass"
 )
-with open("ttt.png", "rb") as f:  # ’ˆÓFƒoƒCƒiƒŠ[ƒ‚[ƒh(rb)‚ÅŠJ‚­•K—v‚ª‚ ‚é
+with open("ttt.png", "rb") as f:  # æ³¨æ„ï¼šãƒã‚¤ãƒŠãƒªãƒ¼ãƒ¢ãƒ¼ãƒ‰(rb)ã§é–‹ãå¿…è¦ãŒã‚ã‚‹
     ftp.storbinary("STOR /chinpo.png", f)
