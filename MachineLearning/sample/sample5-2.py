@@ -184,6 +184,10 @@ score = model.evaluate(x_test, y_test, verbose=0)
 print("Test loss:", score[0])
 print("Test accuracy:", score[1])
 
+# モデルの保存
+FILE_PATH = "my_model.h5"
+model.save(FILE_PATH)
+
 # 予測
 predict_classes = model.predict_classes(x_test, batch_size=32)
 true_classes = np.argmax(y_test,1)
