@@ -5,7 +5,9 @@ import hashlib
 import random
 import subprocess
 import string
+import MySQLdb
 
+ID_LENGTH       = 8 
 STARTGAME       = "start_game"
 ENDGAME         = "end_game"
 MLPATH          = "python MLTest.py"
@@ -23,6 +25,9 @@ odai_txt        = open(ODAI_TEXT_NAME, "r")
 ODAI            = odai_txt.read().splitlines()
 
 
+
+# 接続する
+#conn = MySQLdb.connect(user='root',passwd='*********',host='localhost',db='rakugaki_battle')
 
 class SocketHandler(socketserver.BaseRequestHandler):
 
@@ -50,7 +55,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #ユーザーのIDを求める
     def __create_id(self):
         while True:
-            id_kouho = SocketHandler.__meke_random_string(self, 8)
+            id_kouho = SocketHandler.__meke_random_string(self, ID_LENGTH)
             if(SocketHandler.__search_and_insert_ID(self, id_kouho) == True):
                 break
         return (id_kouho)
@@ -60,7 +65,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
         #メッセージ作成（game_data, お題, ID）
         my_message = GAMEDATA + ","
         my_message += SocketHandler.__decide_odai(self) + ","
-        my_message += self.id 
+        my_message += self.id + ","
 
         self.client.sendall(my_message.encode())
 
@@ -68,13 +73,13 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __send_result(self, rank):
         my_message = RESULT + ","
         my_message += str(self.score) + ","
-        my_message += str(rank)
+        my_message += str(rank) + ","
 
         self.client.sendall(my_message.encode())
 
     #エラーを送信
     def __send_error(self, error):
-        my_message = ERROR + ", " + error
+        my_message = ERROR + ", " + error + ","
         self.client.sendall(my_message.encode())
         
     #データベース登録
