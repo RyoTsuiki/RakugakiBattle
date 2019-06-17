@@ -1,10 +1,3 @@
-/*
- * 学籍番号：150441087
- * 氏名　　：對木　良
- * クラス　：B
- */
-package com.example.myapplication;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
