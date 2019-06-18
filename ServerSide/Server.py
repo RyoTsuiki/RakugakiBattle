@@ -6,6 +6,7 @@ import random
 import subprocess
 import string
 import MySQLdb
+import textwrap 
 
 ID_LENGTH       = 8 
 STARTGAME       = "start_game"
@@ -27,7 +28,8 @@ ODAI            = odai_txt.read().splitlines()
 
 
 # 接続する
-#conn = MySQLdb.connect(user='root',passwd='*********',host='localhost',db='rakugaki_battle')
+conn = MySQLdb.connect(user='root',passwd='labmember',host='localhost',db='rakugaki_battle',charset='utf8')
+cursor = conn.cursor()
 
 class SocketHandler(socketserver.BaseRequestHandler):
 
@@ -40,8 +42,95 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #IDがかぶってなければDBに追加
     def __search_and_insert_ID(self, id_kouho):
-        return True
+        sql = textwrap.dedent('''
+            SELECT COUNT(*)
+            FROM player_data
+            WHERE id = "{id}" 
+            LIMIT 1;
+        ''').format(id = id_kouho).strip()
+        #IDが重複していればFALSE(違うIDで再び実行されることを期待)
+        count = 0
         
+        
+        try:
+            cursor.execute(sql)
+            count = cursor.fetchone()[0]
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+    
+        if(int(count) >= 1):
+            return False
+
+        
+        sql = textwrap.dedent('''
+            INSERT INTO player_data(id)
+            VALUES ("{id}"); 
+        ''').format(id = id_kouho).strip()
+        
+        print(sql)
+        try:
+            count = cursor.execute(sql)
+            conn.commit() 
+            return True
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+        
+    #名前をDBに追加
+    def __add_db_name(self):
+        sql = textwrap.dedent('''
+            UPDATE player_data
+            SET name = "{name}"
+            WHERE id = "{id}";
+        ''').format(id = self.id, name = self.name).strip()
+
+        print(sql)
+        try:
+            count = cursor.execute(sql)
+            conn.commit() 
+            return True
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+
+    #スコアを追加
+    def __add_db_score(self):
+        sql = textwrap.dedent('''
+            UPDATE player_data
+            SET score = "{score}"
+            WHERE id = "{id}";
+        ''').format(id = self.id, score = self.score).strip()
+
+        try:
+            count = cursor.execute(sql)
+            conn.commit() 
+            return True
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+
+    #データベースから順位を求める
+    def __search_rank_from_DB(self):
+        sql = textwrap.dedent('''
+            select rank()OVER(ORDER BY score DESC) 
+            from player_data
+            where score IS NOT NULL
+                and id = "{id}";
+        ''').format(id = self.id).strip()
+        print(sql)
+        #IDが重複していればFALSE(違うIDで再び実行されることを期待)
+        rank = 0
+    
+        try:
+            cursor.execute(sql)
+            rank = cursor.fetchone()[0]
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+
+        return rank 
+
     #ランダムな文字列を作成
     def __meke_random_string(self, length):
         return("".join([random.choice(string.ascii_letters + string.digits) for i in range(length)]))
@@ -68,6 +157,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
         my_message += self.id + ","
 
         self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
 
     #結果を送信
     def __send_result(self, rank):
@@ -76,19 +166,19 @@ class SocketHandler(socketserver.BaseRequestHandler):
         my_message += str(rank) + ","
 
         self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
 
     #エラーを送信
     def __send_error(self, error):
         my_message = ERROR + ", " + error + ","
         self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
         
     #データベース登録
     def __regist_DB(self):
         pass
 
-    #データベースから順位を求める
-    def __search_rank_from_DB(self):
-        return KARI
+
 
     #前処理
     def __mae_syori(self, data):
@@ -112,6 +202,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
         if reqest == STARTGAME: 
             self.name = messages[1]
             SocketHandler.__send_game_data(self)
+            SocketHandler.__add_db_name(self)
 
         elif reqest == ENDGAME:
             data = "test"
@@ -121,10 +212,12 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.score = SocketHandler.__send_ML(self, img_path)
             print(str(self.client_address) + " -score- " + str(self.score))
             SocketHandler.__ato_syori(self, data)
-            SocketHandler.__regist_DB(self)
+            SocketHandler.__add_db_score(self)
             rank = SocketHandler.__search_rank_from_DB(self)
             SocketHandler.__send_result(self, rank)
-            
+
+        elif reqest == ERROR:
+            pass
         else: 
             SocketHandler.__send_error(self,"")
 
