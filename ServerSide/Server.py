@@ -2,13 +2,16 @@ import socketserver
 from ftplib import FTP
 import socket
 import hashlib
-import random
 import subprocess
 import string
 import MySQLdb
 import textwrap 
+import datetime
+import random
 
 ID_LENGTH       = 8 
+RANKING         = "ranking"
+REQ_RANKING 	= "req_ranking"
 STARTGAME       = "start_game"
 ENDGAME         = "end_game"
 MLPATH          = "python MLTest.py"
@@ -17,6 +20,7 @@ GAMEDATA        = "game_data"
 ERROR           = "error"
 FINISH          = "finish"
 KARI            = 404
+IMG_FOLDER_PATH = ""
 #サーバ側のホストとポート
 HOST, PORT      = "", 12345
 #お題データのファイル名
@@ -68,7 +72,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
             VALUES ("{id}"); 
         ''').format(id = id_kouho).strip()
         
-        print(sql)
         try:
             count = cursor.execute(sql)
             conn.commit() 
@@ -81,11 +84,10 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __add_db_name(self):
         sql = textwrap.dedent('''
             UPDATE player_data
-            SET name = "{name}"
+            SET name = "{name}", odai = "{odai}"
             WHERE id = "{id}";
-        ''').format(id = self.id, name = self.name).strip()
+        ''').format(id = self.id, name = self.name, odai = self.odai).strip()
 
-        print(sql)
         try:
             count = cursor.execute(sql)
             conn.commit() 
@@ -111,14 +113,15 @@ class SocketHandler(socketserver.BaseRequestHandler):
             return False
 
     #データベースから順位を求める
-    def __search_rank_from_DB(self):
+    def __search_rank_from_db(self):
         sql = textwrap.dedent('''
-            select rank()OVER(ORDER BY score DESC) 
-            from player_data
-            where score IS NOT NULL
-                and id = "{id}";
+            select leaderboard.rank 
+            from (
+                select id, rank()OVER(ORDER BY score DESC) as "rank"
+                from player_data
+                where score IS NOT NULL) leaderboard
+            where 	leaderboard.id = "{id}";
         ''').format(id = self.id).strip()
-        print(sql)
         #IDが重複していればFALSE(違うIDで再び実行されることを期待)
         rank = 0
     
@@ -130,6 +133,38 @@ class SocketHandler(socketserver.BaseRequestHandler):
             return False
 
         return rank 
+
+    def __db_ranking(self):
+        sql = textwrap.dedent("""
+            select rank()OVER(ORDER BY score DESC) as "rank", player_data.*
+            from player_data
+            where score IS NOT NULL
+            limit 5;
+        """).strip()
+
+        try:
+            cursor.execute(sql)
+            rank = cursor.fetchall()
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+
+        return rank 
+
+    def __db_delete(self):
+        sql = textwrap.dedent("""
+            delete 
+            from player_data 
+            where id = "{id}";
+        """).format(id = self.id).strip()
+
+        try:
+            cursor.execute(sql)
+            conn.commit() 
+            print("deleted{self.id}")
+        except MySQLdb.Error as e:
+            print(e)
+            return False
 
     #ランダムな文字列を作成
     def __meke_random_string(self, length):
@@ -149,11 +184,23 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 break
         return (id_kouho)
 
+    def __send_ranking(self):
+        my_message  = RANKING + ","
+        records     = SocketHandler.__db_ranking(self)
+        for record in records:
+            my_message += "@".join((map(str,record)))
+            my_message += ";"
+
+        self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
+
+
+
     #ゲームデータメッセージを送る
     def __send_game_data(self):
         #メッセージ作成（game_data, お題, ID）
         my_message = GAMEDATA + ","
-        my_message += SocketHandler.__decide_odai(self) + ","
+        my_message += self.odai + ","
         my_message += self.id + ","
 
         self.client.sendall(my_message.encode())
@@ -174,10 +221,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
         
-    #データベース登録
-    def __regist_DB(self):
-        pass
-
 
 
     #前処理
@@ -200,32 +243,44 @@ class SocketHandler(socketserver.BaseRequestHandler):
         reqest = messages[0]
 
         if reqest == STARTGAME: 
+            if(self.shinkoudo >= 1):
+                SocketHandler.__db_delete(self)
+                SocketHandler.__send_error(self,"リスタートされました")
+                
+            self.shinkoudo = 1
+            self.id = SocketHandler.__create_id(self)
             self.name = messages[1]
+            self.odai = SocketHandler.__decide_odai(self)
             SocketHandler.__send_game_data(self)
             SocketHandler.__add_db_name(self)
 
         elif reqest == ENDGAME:
-            data = "test"
-            SocketHandler.__mae_syori(self, data)
-            img_path = "" + self.id + ".jpg"
-            print(str(self.client_address) + " -sendML- " + img_path)
-            self.score = SocketHandler.__send_ML(self, img_path)
-            print(str(self.client_address) + " -score- " + str(self.score))
-            SocketHandler.__ato_syori(self, data)
-            SocketHandler.__add_db_score(self)
-            rank = SocketHandler.__search_rank_from_DB(self)
-            SocketHandler.__send_result(self, rank)
-
+            if(self.shinkoudo <= 0):
+                SocketHandler.__send_error(self,"ゲームが開始されていません")
+            else:
+                data = "test"
+                SocketHandler.__mae_syori(self, data)
+                img_path = IMG_FOLDER_PATH + self.id + ".jpg"
+                print(str(self.client_address) + " -sendML- " + img_path)
+                self.score = SocketHandler.__send_ML(self, img_path)
+                print(str(self.client_address) + " -score- " + str(self.score))
+                SocketHandler.__ato_syori(self, data)
+                SocketHandler.__add_db_score(self)
+                rank = SocketHandler.__search_rank_from_db(self)
+                SocketHandler.__send_result(self, rank)
+                self.shinkoudo = 0
+        elif reqest == REQ_RANKING:
+            SocketHandler.__send_ranking(self)
         elif reqest == ERROR:
             pass
         else: 
-            SocketHandler.__send_error(self,"")
+            SocketHandler.__send_error(self,"指定形式のメッセージではありません")
 
     #クライアントが接続してきたら
     def handle(self):
         #通信先のクライアント
         self.client = self.request
-        self.id = SocketHandler.__create_id(self)
+        self.shinkoudo = 0
         print("connected" + str(self.client_address))
 
         #メッセージを受け取る
