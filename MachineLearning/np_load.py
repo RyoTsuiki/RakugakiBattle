@@ -10,19 +10,20 @@ def __create_list():
 
 def load_data(validation_split=0.2):
     label = __create_list()
-    x_train = x_test = np.empty((0,28, 28))
+    x_train = x_test = np.empty((0,28, 28, 1))
     y_train = y_test = np.empty((0,))
     for keys, values in label.items():
         data = np.load(FILE_PATH + keys + ".npy")
+        data = data[:1000,]
         classes = np.ones(shape=data.shape[0], dtype=np.int32)
         classes *= values
         print(keys, values, data.shape, classes.shape)
         train_size = math.floor(len(data)*(1-validation_split))
         x_train = np.append(x_train, data[:train_size,]
-                .reshape((train_size, 28, 28)), axis=0)
+                .reshape((train_size, 28, 28, 1)), axis=0)
         y_train = np.append(y_train, classes[:train_size,], axis=0)
         x_test = np.append(x_test, data[train_size:,]
-                .reshape((len(data) - train_size, 28, 28)), axis=0)
+                .reshape((len(data) - train_size, 28, 28, 1)), axis=0)
         y_test = np.append(y_test, classes[train_size:,], axis=0)
     return (x_train, y_train), ( x_test, y_test)
 
