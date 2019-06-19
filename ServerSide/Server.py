@@ -10,6 +10,7 @@ import datetime
 import random
 
 ID_LENGTH       = 8 
+DISCONNECT      = "disconnect"
 RANKING         = "ranking"
 REQ_RANKING 	= "req_ranking"
 STARTGAME       = "start_game"
@@ -246,7 +247,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             if(self.shinkoudo >= 1):
                 SocketHandler.__db_delete(self)
                 SocketHandler.__send_error(self,"リスタートされました")
-                
+
             self.shinkoudo = 1
             self.id = SocketHandler.__create_id(self)
             self.name = messages[1]
@@ -287,10 +288,11 @@ class SocketHandler(socketserver.BaseRequestHandler):
         while(True):
             message = self.client.recv(4096).decode('utf-8').strip()
             print(str(self.client_address) + " - " + message)
-            SocketHandler.__Interpretation_message(self, message)
-            #メッセージがなければ終了
-            if message == "":
+            if message == DISCONNECT or message == "":
+                print("disconnected")
+                self.client.sendall(DISCONNECT.encode())
                 break
+            SocketHandler.__Interpretation_message(self, message)
 
     def send(self,object):
         pass
