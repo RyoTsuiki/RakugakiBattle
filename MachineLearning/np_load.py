@@ -3,8 +3,11 @@ import math
 import glob
 
 # ファイルパスの指定 (末尾に"/"を入れる)
-FILE_PATH = "/home/share/data/"
-#FILE_PATH = "../data/"
+#FILE_PATH = "/home/share/data/"
+FILE_PATH = "../data/"
+X_DATA_SHAPE = (0, 28, 28, 1)
+Y_DATA_SHAPE = (0,)
+EXTENSION = ".npy"
 
 def get_label():
     '''
@@ -17,6 +20,12 @@ def get_label():
     keys = __search_files()
     values = range(len(keys))
     return dict(zip(keys, values))
+
+def get_data_shape():
+    return X_DATA_SHAPE[1:]
+
+def get_number_of_classes():
+    return len(get_label())
 
 def load_data(validation_split=0.2, samples=1000):
     '''
@@ -32,11 +41,11 @@ def load_data(validation_split=0.2, samples=1000):
     '''
     label = get_label()
     # 各戻り値を空のnumpy配列で初期化
-    x_train = x_test = np.empty((0,28, 28, 1))
-    y_train = y_test = np.empty((0,))
+    x_train = x_test = np.empty(X_DATA_SHAPE)
+    y_train = y_test = np.empty(Y_DATA_SHAPE)
     for keys, values in label.items():
         # 元データの読み込み
-        data = np.load(FILE_PATH + keys + ".npy")
+        data = np.load(FILE_PATH + keys + EXTENSION)
         # 使用するデータ数になるよう調節
         if not samples is None:
             data = data[:samples,]
@@ -57,7 +66,7 @@ def load_data(validation_split=0.2, samples=1000):
 
 def __search_files():
     files = glob.glob(FILE_PATH + "*.npy")
-    files = [i.rsplit(".")[0] for i in files]
+    files = [i.rsplit(".")[-2] for i in files]
     files = [i.rsplit("/")[-1] for i in files]
     return files
 
@@ -68,3 +77,5 @@ if __name__ == "__main__":
     print("x_test.shape:",x_test.shape)
     print("y_test.shape:",y_test.shape)
     print(get_label())
+    print(get_number_of_classes())
+    print(get_data_shape())
