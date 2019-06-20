@@ -7,12 +7,13 @@ from tensorflow.python.keras.layers import Dropout
 from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.keras.layers import Dense
 from tensorflow.python.keras.callbacks import TensorBoard
+from tensorflow.python.keras.models import save_model, load_model
 from sklearn.metrics import confusion_matrix
 from sklearn import metrics
 import numpy as np
 
 # データのインポート
-(x_train, y_train), (x_test, y_test) = np_load.load_data()
+(x_train, y_train), (x_test, y_test) = np_load.load_data(samples=10000)
 
 # データの整形
 ## データの大きさを確認
@@ -26,8 +27,8 @@ x_train = x_train/255.
 x_test = x_test/255.
 
 ## クラスベクトルの1-hot ベクトル化
-y_train = to_categorical(y_train, 3)
-y_test = to_categorical(y_test, 3)
+y_train = to_categorical(y_train, np_load.get_number_of_classes())
+y_test = to_categorical(y_test, np_load.get_number_of_classes())
 print("(after 1-hot)y_train.shape:", y_train.shape)
 print("(after 1-hot)y_test.shape:", y_test.shape)
 
@@ -42,7 +43,7 @@ model.add(
         # 出力チャンネル数(特徴マップの数)
         filters=32,
         # 入力されるテンソルの形
-        input_shape=(28, 28, 1),
+        input_shape=np_load.get_data_shape(),
         # カーネルの大きさ 3*3 or 5*5 奇数にする
         kernel_size=(3, 3),
         # カーネルをずらす幅
@@ -147,7 +148,7 @@ model.add(Dropout(0.25))
 model.add(
     Dense(
         # ニューロンの数 (出力次元)
-        units=3,
+        units=np_load.get_number_of_classes(),
         # 活性化関数
         activation='softmax'
     )
@@ -187,13 +188,13 @@ print("Test loss:", score[0])
 print("Test accuracy:", score[1])
 
 # モデルの保存
-#FILE_PATH = "my_model.h5"
-#model.save(FILE_PATH)
+FILE_PATH = "my_model.h5"
+model.save(FILE_PATH)
 
 # 予測
 predict_classes = model.predict_classes(x_test, batch_size=32)
 true_classes = np.argmax(y_test,1)
 print(confusion_matrix(true_classes, predict_classes))
 print("Accuracy:",metrics.accuracy_score(true_classes, predict_classes))
-print(model.predict_proba(x_test[99:100,]))
-
+print(model.predict_proba(x_test[0:1,]))
+print(np_load.get_label())
