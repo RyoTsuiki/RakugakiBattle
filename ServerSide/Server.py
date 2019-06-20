@@ -1,7 +1,5 @@
 import socketserver
-from ftplib import FTP
 import socket
-import hashlib
 import subprocess
 import string
 import MySQLdb
