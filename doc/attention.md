@@ -38,3 +38,9 @@ sudo lsof -i:ポート番号
 ```
 
 (そもそもきちんとソケットを閉じることが大切)
+
+## インストールが必要なライブラリ
+* python==3.5 (anaconda にて入れる)
+* tensorflow==1.5.0 (gpuの場合 tenforflow-gpu==1.5.0)
+* h5py (pip install h5py)
+* scikit.learn (pip install scikit-learn)
