@@ -25,9 +25,14 @@ HOST, PORT      = "", 12345
 #お題データのファイル名
 ODAI_TEXT_NAME  = "odai.txt"
 #お題を取得
-odai_txt        = open(ODAI_TEXT_NAME, "r")
-ODAI            = odai_txt.read().splitlines()
-
+odai_txt        = open(ODAI_TEXT_NAME, "r", encoding = "utf-8")
+odai_lines      = odai_txt.read().splitlines()
+n               = len(odai_lines)
+odai            = []
+for i in range(n):
+    odai.append(odai_lines[i].split(",")[0])
+ODAI            = odai.copy()
+print(ODAI)
 
 
 # 接続する
@@ -228,7 +233,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        cmd = MLPATH + " " + img_path
+        cmd = ["python",MLPATH,img_path]
         score = subprocess.check_output(cmd).decode('utf-8').strip()        
         return(score)
 
@@ -295,12 +300,12 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def send(self,object):
         pass
 
-
 if __name__ == "__main__":
-    server = socketserver.TCPServer((HOST, PORT), SocketHandler)
+    server = socketserver.ThreadingTCPServer((HOST, PORT), SocketHandler)
     print("listen" + str((HOST, PORT)))
     server.serve_forever()
     
+
 
 
 

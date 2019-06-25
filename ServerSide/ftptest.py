@@ -4,6 +4,6 @@ ftp = FTP(
     "labmember",
     passwd="labmember"
 )
-with open("odai.txt", "rb") as f:  # 注意：バイナリーモード(rb)で開く必要がある
+with open("mysqldump_rakugakibattle.mp", "rb") as f:  # 注意：バイナリーモード(rb)で開く必要がある
     print("ok")
-    ftp.storlines("STOR test.txt", f)
+    ftp.storbinary("STOR mysqldump_rakugakibattle.mp", f)
