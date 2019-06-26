@@ -6,6 +6,9 @@ import MySQLdb
 import textwrap 
 import datetime
 import random
+import sys
+sys.path.append("../MachineLearning")
+import predict
 
 ID_LENGTH       = 8 
 DISCONNECT      = "disconnect"
