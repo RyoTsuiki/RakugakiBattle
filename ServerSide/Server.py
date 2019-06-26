@@ -22,7 +22,7 @@ GAMEDATA        = "game_data"
 ERROR           = "error"
 FINISH          = "finish"
 KARI            = 404
-IMG_FOLDER_PATH = ""
+IMG_FOLDER_PATH = "../img/"
 #サーバ側のホストとポート
 HOST, PORT      = "", 12345
 #お題データのファイル名
