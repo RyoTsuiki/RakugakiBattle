@@ -2,14 +2,16 @@ import numpy as np
 import math
 import glob
 
-# ファイルパスの指定 (末尾に"/"を入れる)
 #FILE_PATH = "/home/share/data/"
 FILE_PATH = "../data/"
+#FILE_PATH = ""
+
 X_DATA_SHAPE = (0, 28, 28, 1)
 Y_DATA_SHAPE = (0,)
 EXTENSION = ".npy"
+LABEL = {'car': 0, 'cat': 1, 'dog': 2}
 
-def get_label():
+def __create_label():
     '''
     クラス名とそれに対応した値(辞書型)を返す
     keys: class name (English)
@@ -19,17 +21,19 @@ def get_label():
     '''
     keys = __search_files()
     values = range(len(keys))
-    return dict(zip(keys, values))
+    global LABEL
+    LABEL = dict(zip(keys, values))
+    return LABEL
 
 def get_data_shape():
     return X_DATA_SHAPE[1:]
 
 def get_number_of_classes():
-    return len(get_label())
+    return len(LABEL)
 
 def load_data(validation_split=0.2, samples=1000):
     '''
-    __create_list() をもとにqwick draw dataset を読み込む
+    __create_label() をもとにqwick draw dataset を読み込む
     validation_split: 全データのうちテストデータの比率
                     　小数点以下切り捨て
     samples: 使用するデータ数 None を指定した場合すべてのデータを返す
@@ -39,7 +43,7 @@ def load_data(validation_split=0.2, samples=1000):
     x_test: テストに使用する画像データ (*,28,28,1) ndarray
     y_test: テストに使用するラベル (*) ndarray
     '''
-    label = get_label()
+    label = __create_label()
     # 各戻り値を空のnumpy配列で初期化
     x_train = x_test = np.empty(X_DATA_SHAPE)
     y_train = y_test = np.empty(Y_DATA_SHAPE)
@@ -69,13 +73,3 @@ def __search_files():
     files = [i.rsplit(".")[-2] for i in files]
     files = [i.rsplit("/")[-1] for i in files]
     return files
-
-if __name__ == "__main__":
-    (x_train, y_train), (x_test, y_test) = load_data(0.2,1000)
-    print("x_train.shape:",x_train.shape)
-    print("y_train.shape:",y_train.shape)
-    print("x_test.shape:",x_test.shape)
-    print("y_test.shape:",y_test.shape)
-    print(get_label())
-    print(get_number_of_classes())
-    print(get_data_shape())
