@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import glob
+import csv
 
 #FILE_PATH = "/home/share/data/"
 FILE_PATH = "../data/"
@@ -9,7 +10,7 @@ FILE_PATH = "../data/"
 X_DATA_SHAPE = (0, 28, 28, 1)
 Y_DATA_SHAPE = (0,)
 EXTENSION = ".npy"
-LABEL = {'car': 0, 'cat': 1, 'dog': 2}
+LABEL = None
 
 def __create_label():
     '''
@@ -30,6 +31,12 @@ def get_data_shape():
 
 def get_number_of_classes():
     return len(LABEL)
+
+def get_label(file=None):
+    global LABEL
+    if LABEL is None:
+        LABEL = read_dict(file)
+    return LABEL
 
 def load_data(validation_split=0.2, samples=1000):
     '''
@@ -73,3 +80,21 @@ def __search_files():
     files = [i.rsplit(".")[-2] for i in files]
     files = [i.rsplit("/")[-1] for i in files]
     return files
+
+def write_csv(file, save_dict):
+    key_list = [key for key in save_dict.keys()]
+    print(key_list)
+    with open(file, "w") as f:
+        writer = csv.DictWriter(f, key_list)
+        writer.writeheader()
+        writer.writerow(save_dict)
+
+def read_dict(file):
+    with open(file, "r") as f:
+        reader = csv.DictReader(f)
+        l = [row for row in reader]
+    return {key:value for key, value in l[0].items()}
+
+def save_info(file, info):
+    with open(file, "w", encoding="UTF_8") as f:
+        f.write(info)

@@ -86,17 +86,20 @@ def preprocessing(img_path):
     print(left, right, top, botom)
     return result
 
-def predict(model, img_path, prepro_flag = False):
+def predict(model, img_path, file_path, prepro_flag = False):
     if prepro_flag: img = preprocessing(img_path)
     else: img = cv2.imread(img_path,0)
     img = cv2.resize(img, (28, 28))
     print(img.shape)
     model = load_model(model)
     proba = model.predict_proba(img.reshape(1, 28, 28, 1))
-    label = {v: k for k, v in np_load.LABEL.items()}
-    return {classes: score for classes, score in zip(label.values(), proba[0])}
+    print(proba)
+    label = {v: k for k, v in np_load.get_label(file_path).items()}
+    score = {classes: score for classes, score in zip(label.values(), proba[0])}
+    score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
+    return score_sorted
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    print(predict(args[0], args[1], True))
-    #print(predict("test.h5", "dog.jpg"))
+    print(predict(args[0], args[1], args[2], True))
+    #print(predict("test.h5", "dog.jpg", label.csv))
