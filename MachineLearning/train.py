@@ -12,8 +12,16 @@ from sklearn.metrics import confusion_matrix
 from sklearn import metrics
 import numpy as np
 
+#パラメータの定義
+
+EPOCHS = 40
+SPLIT = 0.2
+SAMPLES = 1000
+
+# パラメータの定義 ここまで
+
 # データのインポート
-(x_train, y_train), (x_test, y_test) = np_load.load_data(samples=10000)
+(x_train, y_train), (x_test, y_test) = np_load.load_data(samples=SAMPLES)
 
 # データの整形
 ## データの大きさを確認
@@ -167,6 +175,11 @@ model.compile(
 ## TensorBoard のパス
 tsb = TensorBoard(log_dir="./logs/20190613-1")
 
+## 学習係数を下げる
+## https://keras.io/callbacks/
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.001)
+
+
 ## 学習
 ## https://www.tensorflow.org/api_docs/python/tf/keras/models/Model#fit
 history_model = model.fit(
@@ -175,11 +188,11 @@ history_model = model.fit(
     # 勾配更新ごとのサンプル数
     batch_size=32,
     # モデルを訓練するためのエポック数
-    epochs=20,
+    epochs=EPOCHS,
     # 検証データとして使用するトレーニングデータの割合
-    validation_split=0.2,
+    validation_split=SPLIT,
     # コールバック関数 TensorBoard を使用する
-    callbacks=[tsb]
+    callbacks=[tsb, reduce_lr]
 )
 
 # 結果の表示
@@ -194,7 +207,24 @@ model.save(FILE_PATH)
 # 予測
 predict_classes = model.predict_classes(x_test, batch_size=32)
 true_classes = np.argmax(y_test,1)
-print(confusion_matrix(true_classes, predict_classes))
-print("Accuracy:",metrics.accuracy_score(true_classes, predict_classes))
-print(model.predict_proba(x_test[0:1,]))
-print(np_load.get_label())
+info = "-"*10 + "info" + "-"*10 + "\n"
+print("-"*10 + "info" + "-"*10)
+info += f"{LABEL}\n"
+print(LABEL)
+info += f"train : {y_train.shape[0]*(1-SPLIT)}\n"
+print("train :", y_train.shape[0]*(1-SPLIT))
+info += f"validation : {y_train.shape[0]*SPLIT}\n"
+print("validation :", y_train.shape[0]*SPLIT)
+info += f"test : {y_test.shape[0]} \n"
+print("test :", y_test.shape[0])
+info += f"epochs : {EPOCHS} \n"
+print("epochs :", EPOCHS)
+info += f"保存フォルダー先: {folder}\n"
+print("保存フォルダー先:",folder)
+info += "-"*10 + "test eval" + "-"*10 + "\n"
+print("-"*10 + "test eval" + "-"*10)
+info += f"正答率: {accuracy_score(true_classes, predict_classes)}\n"
+print("正答率:",accuracy_score(true_classes, predict_classes))
+info += f"混同行列\n{confusion_matrix(true_classes, predict_classes)}\n"
+print("混同行列\n", confusion_matrix(true_classes, predict_classes))
+save_info(folder + "/info.txt", info)
