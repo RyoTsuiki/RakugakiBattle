@@ -1,4 +1,5 @@
 import np_load
+import datetime
 from tensorflow.python.keras.utils import to_categorical
 from tensorflow.python.keras.models import Sequential
 from tensorflow.python.keras.layers import Conv2D
@@ -172,13 +173,23 @@ model.compile(
     metrics=["accuracy"]
 )
 
+# 保存するファイルのパス作成
+date = datetime.datetime.now()
+folder = "{0:%Y_%m_%d_%H_%M_%S}".format(date)
 ## TensorBoard のパス
-tsb = TensorBoard(log_dir="./logs/20190613-1")
+tsb = TensorBoard(log_dir="./" + folder + "/log")
 
 ## 学習係数を下げる
 ## https://keras.io/callbacks/
-reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.001)
+#reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.001)
 
+# 学習率 https://blog.shikoan.com/keras-learning-rate-decay/
+def step_decay(epoch):
+    x = 0.1
+    if epoch >= 30: x = 0.01
+    if epoch >= 70: x = 0.001
+    return x
+reduce_lr = LearningRateScheduler(step_decay)
 
 ## 学習
 ## https://www.tensorflow.org/api_docs/python/tf/keras/models/Model#fit
@@ -192,7 +203,9 @@ history_model = model.fit(
     # 検証データとして使用するトレーニングデータの割合
     validation_split=SPLIT,
     # コールバック関数 TensorBoard を使用する
-    callbacks=[tsb, reduce_lr]
+    callbacks=[tsb]
+    # コールバック関数 学習率も変化させる場合
+    #callbacks=[tsb, reduce_lr]
 )
 
 # 結果の表示
@@ -227,4 +240,4 @@ info += f"正答率: {accuracy_score(true_classes, predict_classes)}\n"
 print("正答率:",accuracy_score(true_classes, predict_classes))
 info += f"混同行列\n{confusion_matrix(true_classes, predict_classes)}\n"
 print("混同行列\n", confusion_matrix(true_classes, predict_classes))
-save_info(folder + "/info.txt", info)
+np_load.save_info(folder + "/info.txt", info)

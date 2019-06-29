@@ -8,7 +8,7 @@ import sys
 def find_squares_gray(img):
     """
     グレースケール画像から余白を切り取る関数
-    img : グレースケール画像
+    img : グレースケール画像 ndarray
     return : left, right, top, botom
     """
     x = []
@@ -22,6 +22,11 @@ def find_squares_gray(img):
 
 
 def find_squares_color(img, b, g, r):
+    '''
+    ある特定のRGB値の部分を切り取る関数
+    img : 切り取る前のカラー画像 ndarray
+    b : 青の
+    '''
     left = right = top = botom = 0
     x = []
     y = []
@@ -105,6 +110,8 @@ def predict(model, img_path, label_path, prepro_flag = False):
     if prepro_flag: img = preprocessing(img_path)
     # 画像をグレースケールで読み込む
     else: img = cv2.imread(img_path,0)
+    # 輝度値変換
+    img = 255 - img
     # 画像の正規化
     img = img / 255.
     # 画像のリサイズ(28, 28)
