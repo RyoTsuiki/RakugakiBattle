@@ -7,7 +7,7 @@ from tensorflow.python.keras.layers import MaxPooling2D
 from tensorflow.python.keras.layers import Dropout
 from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.callbacks import TensorBoard
+from tensorflow.python.keras.callbacks import TensorBoard, ReduceLROnPlateau
 from tensorflow.python.keras.models import save_model, load_model
 from sklearn.metrics import confusion_matrix
 from sklearn import metrics
@@ -181,14 +181,14 @@ tsb = TensorBoard(log_dir="./" + folder + "/log")
 
 ## 学習係数を下げる
 ## https://keras.io/callbacks/
-#reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.001)
+reduce_lr = ReduceLROnPlateau(monitor='val_loss', factor=0.2, patience=5, min_lr=0.001)
 
 # 学習率 https://blog.shikoan.com/keras-learning-rate-decay/
-def step_decay(epoch):
-    x = 0.1
-    if epoch >= 30: x = 0.01
-    if epoch >= 70: x = 0.001
-    return x
+#def step_decay(epoch):
+#    x = 0.1
+#    if epoch >= 30: x = 0.01
+#    if epoch >= 70: x = 0.001
+#    return x
 reduce_lr = LearningRateScheduler(step_decay)
 
 ## 学習
