@@ -8,7 +8,7 @@ import sys
 def find_squares_gray(img):
     """
     グレースケール画像から余白を切り取る関数
-    img : グレースケール画像
+    img : グレースケール画像 ndarray
     return : left, right, top, botom
     """
     x = []
@@ -22,6 +22,11 @@ def find_squares_gray(img):
 
 
 def find_squares_color(img, b, g, r):
+    '''
+    ある特定のRGB値の部分を切り取る関数
+    img : 切り取る前のカラー画像 ndarray
+    b : 青の
+    '''
     left = right = top = botom = 0
     x = []
     y = []
@@ -60,6 +65,11 @@ def clipping_img(img, left, right, top, botom):
 
 
 def preprocessing(img_path):
+    """
+    スクリーンショットされた画像の切り取り
+    img_path : 画像のパス
+    return : 加工した画像 ndarray
+    """
     # 画像の読み込み
     img = cv2.imread(img_path)
     # オレンジ色部分で切り出し
@@ -86,17 +96,41 @@ def preprocessing(img_path):
     print(left, right, top, botom)
     return result
 
-def predict(model, img_path, prepro_flag = False):
+def predict(model, img_path, label_path, prepro_flag = False):
+    """
+    推論した結果を辞書型に格納して返す関数
+    model : 使用するモデルのパス
+    img_path : 推論させる画像のパス
+    label_path : 使用するラベルのパス
+                 ラベル:クラス名とそれに対応する数を格納したcsvファイル
+    prepro_flag : 画像を切り抜き処理するかを指定するフラグ
+                  True:切り抜きを行う, False:切り抜きを行わない(デフォルト値)
+    """
+    # 画像をカラー画像で読み込み切り抜きを行う
     if prepro_flag: img = preprocessing(img_path)
+    # 画像をグレースケールで読み込む
     else: img = cv2.imread(img_path,0)
+    # 輝度値変換
+    img = 255 - img
+    # 画像の正規化
+    img = img / 255.
+    # 画像のリサイズ(28, 28)
     img = cv2.resize(img, (28, 28))
-    print(img.shape)
+    #print(img.shape)
+    # モデルの読み込み
     model = load_model(model)
+    # 推論させる
     proba = model.predict_proba(img.reshape(1, 28, 28, 1))
-    label = {v: k for k, v in np_load.LABEL.items()}
-    return {classes: score for classes, score in zip(label.values(), proba[0])}
+    #print(proba)
+    # ラベルのキーと値を反転させる
+    label = {v: k for k, v in np_load.get_label(label_path).items()}
+    # 推論結果をクラス名とその値をセットにした辞書型にする {class:score}
+    score = {classes: score for classes, score in zip(label.values(), proba[0])}
+    # score をもとに降順に並び替える
+    score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
+    return score_sorted
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    print(predict(args[0], args[1], True))
-    #print(predict("test.h5", "dog.jpg"))
+    print(predict(args[0], args[1], args[2], True))
+    #print(predict("test.h5", "dog.jpg", label.csv))

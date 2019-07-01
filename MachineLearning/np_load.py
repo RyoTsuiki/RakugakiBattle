@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import glob
+import csv
 
 #FILE_PATH = "/home/share/data/"
 FILE_PATH = "../data/"
@@ -9,7 +10,7 @@ FILE_PATH = "../data/"
 X_DATA_SHAPE = (0, 28, 28, 1)
 Y_DATA_SHAPE = (0,)
 EXTENSION = ".npy"
-LABEL = {'car': 0, 'cat': 1, 'dog': 2}
+LABEL = None
 
 def __create_label():
     '''
@@ -26,10 +27,31 @@ def __create_label():
     return LABEL
 
 def get_data_shape():
+    '''
+    学習/テストデータの型を返す関数 (28, 28, 1)
+    '''
     return X_DATA_SHAPE[1:]
 
 def get_number_of_classes():
+    '''
+    クラス数を返す関数
+    '''
     return len(LABEL)
+
+def get_label(file=None):
+    '''
+    ラベルを返す関数
+    もし, load_data() を使用していない場合, ラベルが存在しないため外部csv ファイルから呼び出す必要がある
+    その際は, file にファイルパスを指定する必要がある
+    file : ラベルデータを外部のcsv ファイルから読み込む場合, そのファイルパス
+           load_data() にて作成されたラベルが必要な場合, None を渡す必要がある
+           デフォルト : None
+    return : ラベル(辞書型)
+    '''
+    global LABEL
+    if LABEL is None:
+        LABEL = read_dict(file)
+    return LABEL
 
 def load_data(validation_split=0.2, samples=1000):
     '''
@@ -73,3 +95,36 @@ def __search_files():
     files = [i.rsplit(".")[-2] for i in files]
     files = [i.rsplit("/")[-1] for i in files]
     return files
+
+def write_csv(file, save_dict):
+    '''
+    辞書をcsv 形式で書き出す関数
+    file : 書き出すファイルパス
+    save_dict : 書き出す辞書
+    '''
+    key_list = [key for key in save_dict.keys()]
+    with open(file, "w") as f:
+        writer = csv.DictWriter(f, key_list)
+        writer.writeheader()
+        writer.writerow(save_dict)
+
+def read_dict(file):
+    '''
+    csv 形式で保存された辞書を読み込む関数
+    file : :読み込むcsvファイルのパス
+    return : 読み込んだ辞書
+    '''
+    with open(file, "r") as f:
+        reader = csv.DictReader(f)
+        l = [row for row in reader]
+    return {key:value for key, value in l[0].items()}
+
+def save_info(file, info):
+    '''
+    文字列データをテキストファイルに書き出す関数
+    UTF-8 で保存する
+    file : 書き出すファイルパス
+    info : 保存したい文字列
+    '''
+    with open(file, "w", encoding="UTF_8") as f:
+        f.write(info)
