@@ -7,8 +7,8 @@ import textwrap
 import datetime
 import random
 import sys
-sys.path.append("../MachineLearning")
-import predict
+#sys.path.append("C:\\Users\\Ryo Tsuiki\\Desktop\\local\\RakugakiBattle\\MachineLearning")
+#import predict
 
 ID_LENGTH       = 8 
 DISCONNECT      = "disconnect"
@@ -16,11 +16,13 @@ RANKING         = "ranking"
 REQ_RANKING 	= "req_ranking"
 STARTGAME       = "start_game"
 ENDGAME         = "end_game"
-MLPATH          = "python MLTest.py"
+MLPATH          = "MLTest.py"
 RESULT          = "result"
 GAMEDATA        = "game_data"
 ERROR           = "error"
 FINISH          = "finish"
+JOIN            = "join"
+CANCEL          = "cancel"
 KARI            = 404
 IMG_FOLDER_PATH = "../img/"
 #サーバ側のホストとポート
@@ -35,12 +37,14 @@ odai            = []
 for i in range(n):
     odai.append(odai_lines[i].split(",")[0])
 ODAI            = odai.copy()
-print(ODAI)
-
+thread_table = []
 
 # 接続する
 conn = MySQLdb.connect(user='root',passwd='labmember',host='localhost',db='rakugaki_battle',charset='utf8')
 cursor = conn.cursor()
+
+class Room():
+    test = 1
 
 class SocketHandler(socketserver.BaseRequestHandler):
 
@@ -186,14 +190,14 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #ユーザーのIDを求める
     def __create_id(self):
         while True:
-            id_kouho = SocketHandler.__meke_random_string(self, ID_LENGTH)
-            if(SocketHandler.__search_and_insert_ID(self, id_kouho) == True):
+            id_kouho = self.__meke_random_string(ID_LENGTH)
+            if(self.__search_and_insert_ID(id_kouho) == True):
                 break
         return (id_kouho)
 
     def __send_ranking(self):
         my_message  = RANKING + ","
-        records     = SocketHandler.__db_ranking(self)
+        records     = self.__db_ranking()
         for record in records:
             my_message += "@".join((map(str,record)))
             my_message += ";"
@@ -251,40 +255,52 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
         if reqest == STARTGAME: 
             if(self.shinkoudo >= 1):
-                SocketHandler.__db_delete(self)
-                SocketHandler.__send_error(self,"リスタートされました")
+                self.__db_delete()
+                self.__send_error("リスタートされました")
 
             self.shinkoudo = 1
-            self.id = SocketHandler.__create_id(self)
+            self.id = self.__create_id()
             self.name = messages[1]
-            self.odai = SocketHandler.__decide_odai(self)
-            SocketHandler.__send_game_data(self)
-            SocketHandler.__add_db_name(self)
+            self.odai = self.__decide_odai()
+            self.__send_game_data()
+            self.__add_db_name()
 
         elif reqest == ENDGAME:
             if(self.shinkoudo <= 0):
-                SocketHandler.__send_error(self,"ゲームが開始されていません")
+                self.__send_error("ゲームが開始されていません")
             else:
                 data = "test"
-                SocketHandler.__mae_syori(self, data)
+                self.__mae_syori(data)
                 img_path = IMG_FOLDER_PATH + self.id + ".jpg"
                 print(str(self.client_address) + " -sendML- " + img_path)
-                self.score = SocketHandler.__send_ML(self, img_path)
+                self.score = self.__send_ML(img_path)
                 print(str(self.client_address) + " -score- " + str(self.score))
-                SocketHandler.__ato_syori(self, data)
-                SocketHandler.__add_db_score(self)
-                rank = SocketHandler.__search_rank_from_db(self)
-                SocketHandler.__send_result(self, rank)
+                self.__ato_syori(data)
+                self.__add_db_score()
+                rank = self.__search_rank_from_db()
+                self.__send_result(rank)
                 self.shinkoudo = 0
         elif reqest == REQ_RANKING:
-            SocketHandler.__send_ranking(self)
+            self.__send_ranking()
+        elif reqest == JOIN:
+            pass
+            """
+            if not SocketHandler.__check_allready_joined(self):
+                SocketHandler.__join_or_make_room(self)
+            else:
+                player_count = SocketHandler.__check_room_players(self)
+                if(player_count == 2):
+               """     
+            
+            
         elif reqest == ERROR:
             pass
         else: 
-            SocketHandler.__send_error(self,"指定形式のメッセージではありません")
+            self.__send_error("指定形式のメッセージではありません")
 
     #クライアントが接続してきたら
     def handle(self):
+        thread_table.append(self)
         #通信先のクライアント
         self.client = self.request
         self.shinkoudo = 0
@@ -298,7 +314,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 print("disconnected")
                 self.client.sendall(DISCONNECT.encode())
                 break
-            SocketHandler.__Interpretation_message(self, message)
+            self.__Interpretation_message(message)
 
     def send(self,object):
         pass
@@ -315,10 +331,4 @@ if __name__ == "__main__":
 
 
 
-ftp = FTP(
-    "e",
-    "pee",
-    passwd="pass"
-)
-with open("ttt.png", "rb") as f:  # 注意：バイナリーモード(rb)で開く必要がある
-    ftp.storbinary("STOR /chinpo.png", f)
+
