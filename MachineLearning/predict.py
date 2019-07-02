@@ -114,8 +114,21 @@ def predict(model, img_path, label_path, prepro_flag = False):
     img = 255 - img
     # 画像の正規化
     img = img / 255.
-    # 画像のリサイズ(28, 28)
-    img = cv2.resize(img, (28, 28))
+    # 画像のリサイズ(縦横比を保ち長い方を28に)
+    org_lens = np.shape(img)
+    if(org_lens[0] < org_lens[1]):
+        img = cv2.resize(img, (28, min(org_lens[0]*28//org_lens[1]+1,28)))
+    else:
+        img = cv2.resize(img, (min(org_lens[1]*28//org_lens[0]+1,28), 28))
+    #28*28の背景にリサイズした画像を貼り付け
+    imgback = np.zeros((28, 28), np.uint8)
+    aft_lens = np.shape(img)
+    sy = (28-aft_lens[0])//2
+    sx = (28-aft_lens[1])//2
+    for i in range(aft_lens[0]):
+        for j in range(aft_lens[1]):
+            imgback[i+sy][j+sx] += img[i][j]
+    img = imgback
     #print(img.shape)
     # モデルの読み込み
     model = load_model(model)
@@ -128,9 +141,18 @@ def predict(model, img_path, label_path, prepro_flag = False):
     score = {classes: score for classes, score in zip(label.values(), proba[0])}
     # score をもとに降順に並び替える
     score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
+    #読み込んだ画像表示
+    for i in range(28):
+        s = ""
+        for j in range(28):
+            if(img[i][j] > 0.5):s += "黒"
+            elif(img[i][j] > 0.01):s += "灰"
+            else:s+= "　"
+        print(s)
     return score_sorted
 
 if __name__ == "__main__":
     args = sys.argv[1:]
     print(predict(args[0], args[1], args[2], True))
     #print(predict("test.h5", "dog.jpg", label.csv))
+

@@ -37,14 +37,50 @@ odai            = []
 for i in range(n):
     odai.append(odai_lines[i].split(",")[0])
 ODAI            = odai.copy()
-thread_table = []
+room_table = []
 
 # 接続する
 conn = MySQLdb.connect(user='root',passwd='labmember',host='localhost',db='rakugaki_battle',charset='utf8')
 cursor = conn.cursor()
 
+#バトル用
 class Room():
-    test = 1
+    MAX_PLAYER = 2
+    def __init__(self, thread):
+        room_table.append(self)
+        self.players = []
+        self.append(thread)
+        self.odai = ""
+        self.scores = {}
+        self.end_player = 0
+
+    def battle_start(self):
+        for pleyer in room_table:
+            player.battle_start(odai, room_table)
+        
+
+    def add(self, thread):
+        global lock
+        lock.acquire()
+        if(len(room_table) == MAX_PLAYER)
+            self.battle_start()
+        elif(len(room_table) > MAX_PLAYER)
+            print("roomerroroverplayer")
+
+    def add_result(self, score, player):
+        global lock
+        lock.acquire()
+        if(scores[score] == None) : scores[score] = [player] 
+        else : scores[score].append(player)
+        self.end_player += 1
+        if(self.end_player == MAX_PLAYER)
+            self.battle_end()
+        elif(len(room_table) > MAX_PLAYER)
+            print("roomerroroverplayer")
+        lock.release()
+
+
+
 
 class SocketHandler(socketserver.BaseRequestHandler):
 
@@ -54,6 +90,17 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #self.id ユーザーID
     #self.client_address　(IPアドレス,ポート番号)
     #self.client クライアント
+
+    def battle_start(self, odai, rival):
+        #メッセージ作成（game_data, お題, ID）
+        self.odai = odai
+        
+        my_message = BATTLEDATA + ","
+        
+        my_message += self.odai + ","
+        my_message += self.id + ","
+
+        self.client.sendall(my_message.encode())
 
     #IDがかぶってなければDBに追加
     def __search_and_insert_ID(self, id_kouho):
@@ -301,6 +348,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #クライアントが接続してきたら
     def handle(self):
         thread_table.append(self)
+        print(thread_table)
         #通信先のクライアント
         self.client = self.request
         self.shinkoudo = 0
@@ -313,6 +361,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             if message == DISCONNECT or message == "":
                 print("disconnected")
                 self.client.sendall(DISCONNECT.encode())
+                thread_table.remove(self)
                 break
             self.__Interpretation_message(message)
 
