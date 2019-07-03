@@ -7,10 +7,13 @@ import textwrap
 import datetime
 import random
 import sys
+import room
+import threading
 #sys.path.append("C:\\Users\\Ryo Tsuiki\\Desktop\\local\\RakugakiBattle\\MachineLearning")
 #import predict
 
 ID_LENGTH       = 8 
+BATTLEDATA      = "battle_data"
 DISCONNECT      = "disconnect"
 RANKING         = "ranking"
 REQ_RANKING 	= "req_ranking"
@@ -29,6 +32,9 @@ IMG_FOLDER_PATH = "../img/"
 HOST, PORT      = "", 12345
 #お題データのファイル名
 ODAI_TEXT_NAME  = "odai.txt"
+BATTLE_START    = "battle_start"
+BATTLE_CANCEL   = "battle_cancel"
+BATTLEEND       = "battle_end"
 #お題を取得
 odai_txt        = open(ODAI_TEXT_NAME, "r", encoding = "utf-8")
 odai_lines      = odai_txt.read().splitlines()
@@ -37,70 +43,21 @@ odai            = []
 for i in range(n):
     odai.append(odai_lines[i].split(",")[0])
 ODAI            = odai.copy()
-room_table = []
+
 
 # 接続する
 conn = MySQLdb.connect(user='root',passwd='labmember',host='localhost',db='rakugaki_battle',charset='utf8')
 cursor = conn.cursor()
 
-#バトル用
-class Room():
-    MAX_PLAYER = 2
-    def __init__(self, thread):
-        room_table.append(self)
-        self.players = []
-        self.append(thread)
-        self.odai = ""
-        self.scores = {}
-        self.end_player = 0
-
-    def battle_start(self):
-        for pleyer in room_table:
-            player.battle_start(odai, room_table)
-        
-
-    def add(self, thread):
-        global lock
-        lock.acquire()
-        if(len(room_table) == MAX_PLAYER)
-            self.battle_start()
-        elif(len(room_table) > MAX_PLAYER)
-            print("roomerroroverplayer")
-
-    def add_result(self, score, player):
-        global lock
-        lock.acquire()
-        if(scores[score] == None) : scores[score] = [player] 
-        else : scores[score].append(player)
-        self.end_player += 1
-        if(self.end_player == MAX_PLAYER)
-            self.battle_end()
-        elif(len(room_table) > MAX_PLAYER)
-            print("roomerroroverplayer")
-        lock.release()
-
-
-
-
 class SocketHandler(socketserver.BaseRequestHandler):
-
+    haita = threading.Semaphore(1)
+    waiting_room = None
     #self
     #self.score 得点
     #self.name ユーザー名
     #self.id ユーザーID
     #self.client_address　(IPアドレス,ポート番号)
     #self.client クライアント
-
-    def battle_start(self, odai, rival):
-        #メッセージ作成（game_data, お題, ID）
-        self.odai = odai
-        
-        my_message = BATTLEDATA + ","
-        
-        my_message += self.odai + ","
-        my_message += self.id + ","
-
-        self.client.sendall(my_message.encode())
 
     #IDがかぶってなければDBに追加
     def __search_and_insert_ID(self, id_kouho):
@@ -171,7 +128,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             return False
 
     #データベースから順位を求める
-    def __search_rank_from_db(self):
+    def search_rank_from_db(xp_id):
         sql = textwrap.dedent('''
             select leaderboard.rank 
             from (
@@ -179,8 +136,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 from player_data
                 where score IS NOT NULL) leaderboard
             where 	leaderboard.id = "{id}";
-        ''').format(id = self.id).strip()
-        #IDが重複していればFALSE(違うIDで再び実行されることを期待)
+        ''').format(id = xp_id).strip()
+        
         rank = 0
     
         try:
@@ -209,6 +166,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
         return rank 
 
+    #指定したIDのdataを消す
     def __db_delete(self):
         sql = textwrap.dedent("""
             delete 
@@ -233,6 +191,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __decide_odai(self):
         odai_index = random.randint(0, (len(ODAI) - 1))
         return( ODAI[odai_index] )
+
 
     #ユーザーのIDを求める
     def __create_id(self):
@@ -274,12 +233,11 @@ class SocketHandler(socketserver.BaseRequestHandler):
         print("send:  " + my_message)
 
     #エラーを送信
-    def __send_error(self, error):
+    def send_error(self, error):
         my_message = ERROR + ", " + error + ","
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
         
-
 
     #前処理
     def __mae_syori(self, data):
@@ -295,15 +253,41 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __ato_syori(self, data):
         pass
 
+    #バトルの情報を送信
+    def __send_battle_data(self,players):
+        #メッセージ作成（game_data, お題, ID）
+        my_message = BATTLEDATA + ","
+        my_message += self.odai + ","
+        my_message += self.id + ","
+        for player in players:
+            my_message += player.name + ","
+        self.client.sendall(my_message.encode())
+
+    def battle_start(self, room_odai, players):
+            if(self.shinkoudo >= 1):
+                self.__db_delete()
+                self.send_error("リスタートされました")
+
+            self.shinkoudo = 1
+            self.id = self.__create_id()
+            self.odai = room_odai
+            self.__add_db_name()
+            self.__send_battle_data(players)
+
+    def battle_end(self,scores):
+        my_message = BATTLEEND + ","
+        for player_rs in scores:
+            my_message += "@".join(map(str,([player_rs[0],player_rs[1],player_rs[2],player_rs[3]]))) + ","
+        self.client.sendall(my_message.encode())
     #送られてきたメッセージを解釈する
     def __Interpretation_message(self, message):
         messages = message.split(",")
         reqest = messages[0]
-
+        #ゲーム開始時
         if reqest == STARTGAME: 
             if(self.shinkoudo >= 1):
                 self.__db_delete()
-                self.__send_error("リスタートされました")
+                self.send_error("リスタートされました")
 
             self.shinkoudo = 1
             self.id = self.__create_id()
@@ -311,10 +295,10 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.odai = self.__decide_odai()
             self.__send_game_data()
             self.__add_db_name()
-
+        #落書き終了時
         elif reqest == ENDGAME:
             if(self.shinkoudo <= 0):
-                self.__send_error("ゲームが開始されていません")
+                self.send_error("ゲームが開始されていません")
             else:
                 data = "test"
                 self.__mae_syori(data)
@@ -324,34 +308,53 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 print(str(self.client_address) + " -score- " + str(self.score))
                 self.__ato_syori(data)
                 self.__add_db_score()
-                rank = self.__search_rank_from_db()
-                self.__send_result(rank)
-                self.shinkoudo = 0
+                if(self.my_room is None):
+                    rank = SocketHandler.search_rank_from_db(self.id)
+                    self.__send_result(rank)
+                    self.shinkoudo = 0
+                else:
+                    self.my_room.add_result(self)
+                    self.shinkoudo = 0
+        #ランキング要求時
         elif reqest == REQ_RANKING:
             self.__send_ranking()
-        elif reqest == JOIN:
-            pass
-            """
-            if not SocketHandler.__check_allready_joined(self):
-                SocketHandler.__join_or_make_room(self)
+        #バトル開始時
+        elif reqest == BATTLE_START:
+            if(not(self.my_room is None)): 
+                self.send_error("すでに開始されています")
+                return
+            self.name = messages[1]
+            SocketHandler.haita.acquire()
+            if(room.Room.waiting is None):
+                self.my_room = room.Room(self)
+                print(str(self.client_address) + " -roomMake- ")
+                self.client.sendall(b"waiting")
             else:
-                player_count = SocketHandler.__check_room_players(self)
-                if(player_count == 2):
-               """     
-            
-            
+                self.my_room = room.Room.waiting.add_prayer(self)
+                print(str(self.client_address) + " -roomAdd- ")
+                self.client.sendall(b"added")
+            SocketHandler.haita.release()
+        #バトルキャンセル時
+        elif reqest == BATTLE_CANCEL:
+            if self.shinkoudo >= 1:
+                self.send_error("バトルが開始されています")
+            elif self.my_room is None:
+                self.send_error("部屋を立てていません")
+            else:
+                self.my_room.cancel()
+                self.my_room = None
+                self.send_error("キャンセルされました")
         elif reqest == ERROR:
             pass
         else: 
-            self.__send_error("指定形式のメッセージではありません")
+            self.send_error("指定形式のメッセージではありません")
 
     #クライアントが接続してきたら
     def handle(self):
-        thread_table.append(self)
-        print(thread_table)
         #通信先のクライアント
         self.client = self.request
         self.shinkoudo = 0
+        self.my_room = None
         print("connected" + str(self.client_address))
 
         #メッセージを受け取る
@@ -360,8 +363,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
             print(str(self.client_address) + " - " + message)
             if message == DISCONNECT or message == "":
                 print("disconnected")
+                if(not self.my_room is None):   self.my_room.cancel()
                 self.client.sendall(DISCONNECT.encode())
-                thread_table.remove(self)
+                SocketHandler.haita.release()
                 break
             self.__Interpretation_message(message)
 
