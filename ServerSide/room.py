@@ -22,7 +22,7 @@ class Room():
             return Room(added_player)
     #インスタンスにバトル開始を伝える
     def battle_start(self):
-        self.waiting = None
+        Room.waiting = None
         for player in self.players:
             player.battle_start(self.odai, self.players)
 
