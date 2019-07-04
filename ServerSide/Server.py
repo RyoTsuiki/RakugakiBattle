@@ -72,8 +72,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
         
         
         try:
-            cursor.execute(sql)
-            count = cursor.fetchone()[0]
+            self.cursor.execute(sql)
+            count = self.cursor.fetchone()[0]
         except MySQLdb.Error as e:
             print(e)
             return False
@@ -88,8 +88,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
         ''').format(id = id_kouho).strip()
         
         try:
-            count = cursor.execute(sql)
-            conn.commit() 
+            count = self.cursor.execute(sql)
+            self.conn.commit() 
             return True
         except MySQLdb.Error as e:
             print(e)
@@ -104,8 +104,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
         ''').format(id = self.id, name = self.name, odai = self.odai).strip()
 
         try:
-            count = cursor.execute(sql)
-            conn.commit() 
+            count = self.cursor.execute(sql)
+            self.conn.commit() 
             return True
         except MySQLdb.Error as e:
             print(e)
@@ -120,15 +120,15 @@ class SocketHandler(socketserver.BaseRequestHandler):
         ''').format(id = self.id, score = self.score).strip()
 
         try:
-            count = cursor.execute(sql)
-            conn.commit() 
+            count = self.cursor.execute(sql)
+            self.conn.commit() 
             return True
         except MySQLdb.Error as e:
             print(e)
             return False
 
     #データベースから順位を求める
-    def search_rank_from_db(xp_id):
+    def search_rank_from_db(self, xp_id):
         sql = textwrap.dedent('''
             select leaderboard.rank 
             from (
@@ -137,12 +137,13 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 where score IS NOT NULL) leaderboard
             where 	leaderboard.id = "{id}";
         ''').format(id = xp_id).strip()
-        
+        print(sql)
         rank = 0
-    
         try:
-            cursor.execute(sql)
-            rank = cursor.fetchone()[0]
+            self.cursor.execute(sql)
+            res = self.cursor.fetchone()
+            print(res)
+            rank = res[0]
         except MySQLdb.Error as e:
             print(e)
             return False
@@ -158,8 +159,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
         """).strip()
 
         try:
-            cursor.execute(sql)
-            rank = cursor.fetchall()
+            self.cursor.execute(sql)
+            rank = self.cursor.fetchall()
         except MySQLdb.Error as e:
             print(e)
             return False
@@ -175,8 +176,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
         """).format(id = self.id).strip()
 
         try:
-            cursor.execute(sql)
-            conn.commit() 
+            self.cursor.execute(sql)
+            self.conn.commit() 
             print("deleted{self.id}")
         except MySQLdb.Error as e:
             print(e)
@@ -310,7 +311,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 self.__ato_syori(data)
                 self.__add_db_score()
                 if(self.my_room is None):
-                    rank = SocketHandler.search_rank_from_db(self.id)
+                    rank = self.search_rank_from_db(self.id)
                     self.__send_result(rank)
                     self.shinkoudo = 0
                 else:
@@ -353,6 +354,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #クライアントが接続してきたら
     def handle(self):
         #通信先のクライアント
+        self.conn = conn
+        self.cursor  = cursor
         self.client = self.request
         self.shinkoudo = 0
         self.my_room = None

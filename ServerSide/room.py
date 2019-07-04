@@ -35,12 +35,13 @@ class Room():
     def add_result(self,player):
         self.scores.append([player.score, player.name, player.id])
         if(len(self.scores) == Room.MAX_PLAYER):
-            self.battle_end()
+            self.battle_end(player)
 
     #インスタンスにバトル結果を伝える
-    def battle_end(self):
+    def battle_end(self, player):
+        print(self.scores)
         for i in range(len(self.scores)):
-            self.scores[i].append(server.SocketHandler.search_rank_from_db(self.scores[i][2]))
+            self.scores[i].append(server.SocketHandler.search_rank_from_db(player,self.scores[i][2]))
         for player in self.players:
             player.battle_end(self.scores)
 
