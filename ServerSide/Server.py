@@ -279,6 +279,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
         for player_rs in scores:
             my_message += "@".join(map(str,([player_rs[0],player_rs[1],player_rs[2],player_rs[3]]))) + ","
         self.client.sendall(my_message.encode())
+        self.my_room = None
     #送られてきたメッセージを解釈する
     def __Interpretation_message(self, message):
         messages = message.split(",")
