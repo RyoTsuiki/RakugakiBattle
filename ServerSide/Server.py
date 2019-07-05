@@ -246,8 +246,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        cmd = ["python",MLPATH,img_path]
-        score = subprocess.check_output(cmd).decode('utf-8').strip()        
+        score = int(predict.predict("../MachineLearning/standard/model.h5",img_path,"../MachineLearning/standard/label.csv")[self.odai] * 1000) 
         return(score)
 
     #後処理
