@@ -141,6 +141,8 @@ def predict(model, img_path, label_path, prepro_flag = False):
     score = {classes: score for classes, score in zip(label.values(), proba[0])}
     # score をもとに降順に並び替える
     score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
+    # list -> dict
+    score_sorted = {classes: score for classes, score in score_sorted}
     #読み込んだ画像表示
     for i in range(28):
         s = ""
@@ -155,4 +157,3 @@ if __name__ == "__main__":
     args = sys.argv[1:]
     print(predict(args[0], args[1], args[2], True))
     #print(predict("test.h5", "dog.jpg", label.csv))
-
