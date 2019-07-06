@@ -1,4 +1,4 @@
-import server
+import Server
 import random
 
 class Room():

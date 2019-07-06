@@ -9,6 +9,10 @@ import random
 import sys
 import room
 import threading
+sys.path.append("../MachineLearning")
+import predict
+import np_load
+import time
 #sys.path.append("C:\\Users\\Ryo Tsuiki\\Desktop\\local\\RakugakiBattle\\MachineLearning")
 #import predict
 
@@ -246,7 +250,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        score = int(predict.predict("../MachineLearning/standard/model.h5",img_path,"../MachineLearning/standard/label.csv")[self.odai] * 1000) 
+        score = int(predict.predict("../../standard/model.h5",img_path,"../../standard/label.csv")[self.odai] * 1000) 
         return(score)
 
     #後処理
@@ -303,8 +307,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
             else:
                 data = "test"
                 self.__mae_syori(data)
-                img_path = IMG_FOLDER_PATH + self.id + ".jpg"
+                img_path = IMG_FOLDER_PATH + self.id + ".png"
                 print(str(self.client_address) + " -sendML- " + img_path)
+                time.sleep(1)
                 self.score = self.__send_ML(img_path)
                 print(str(self.client_address) + " -score- " + str(self.score))
                 self.__ato_syori(data)
