@@ -96,7 +96,7 @@ def preprocessing(img_path):
     print(left, right, top, botom)
     return result
 
-def predict(model, img_path, label_path, prepro_flag = False):
+def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = False):
     """
     推論した結果を辞書型に格納して返す関数
     model : 使用するモデルのパス
@@ -105,6 +105,7 @@ def predict(model, img_path, label_path, prepro_flag = False):
                  ラベル:クラス名とそれに対応する数を格納したcsvファイル
     prepro_flag : 画像を切り抜き処理するかを指定するフラグ
                   True:切り抜きを行う, False:切り抜きを行わない(デフォルト値)
+    raw_model_flag : True:モデルを直接読み込む Author:RyoTsuiki
     """
     # 画像をカラー画像で読み込み切り抜きを行う
     if prepro_flag: img = preprocessing(img_path)
@@ -131,7 +132,7 @@ def predict(model, img_path, label_path, prepro_flag = False):
     img = imgback
     #print(img.shape)
     # モデルの読み込み
-    model = load_model(model)
+    if(not raw_model_flag):model = load_model(model)
     # 推論させる
     proba = model.predict_proba(img.reshape(1, 28, 28, 1))
     #print(proba)

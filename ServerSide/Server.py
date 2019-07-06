@@ -9,10 +9,20 @@ import random
 import sys
 import room
 import threading
+import cv2
 sys.path.append("../MachineLearning")
 import predict
 import np_load
 import time
+import numpy as np
+from tensorflow.python.keras.models import load_model
+'''
+from keras import backend as K
+from keras.datasets import cifar10
+from keras.models import load_model
+from keras.utils import to_categorical
+from keras_compressor import custom_objects
+'''
 #sys.path.append("C:\\Users\\Ryo Tsuiki\\Desktop\\local\\RakugakiBattle\\MachineLearning")
 #import predict
 
@@ -39,13 +49,15 @@ ODAI_TEXT_NAME  = "odai.txt"
 BATTLE_START    = "battle_start"
 BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
+MODEL_PATH      = "../../standard/model.h5"
+label_path      = "../../standard/label.csv"
 #お題を取得
 odai_txt        = open(ODAI_TEXT_NAME, "r", encoding = "utf-8")
 odai_lines      = odai_txt.read().splitlines()
 n               = len(odai_lines)
 odai            = []
 for i in range(n):
-    odai.append(odai_lines[i].split(",")[0])
+    odai.append(odai_lines[i].split(","))
 ODAI            = odai.copy()
 
 
@@ -195,7 +207,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #お題を決める
     def __decide_odai(self):
         odai_index = random.randint(0, (len(ODAI) - 1))
-        return( ODAI[odai_index] )
+        return( ODAI[odai_index][0] , ODAI[odai_index][1])
 
 
     #ユーザーのIDを求める
@@ -222,9 +234,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __send_game_data(self):
         #メッセージ作成（game_data, お題, ID）
         my_message = GAMEDATA + ","
-        my_message += self.odai + ","
+        my_message += self.odai_japanese + ","
         my_message += self.id + ","
-
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
 
@@ -250,7 +261,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        score = int(predict.predict("../../standard/model.h5",img_path,"../../standard/label.csv")[self.odai] * 1000) 
+        scores = predict.predict(self.model,img_path,label_path,raw_model_flag = True)
+        print(scores)
+        score = int(scores[self.odai] * 1000) 
         return(score)
 
     #後処理
@@ -297,7 +310,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.shinkoudo = 1
             self.id = self.__create_id()
             self.name = messages[1]
-            self.odai = self.__decide_odai()
+            self.odai,self.odai_japanese = self.__decide_odai()
             self.__send_game_data()
             self.__add_db_name()
         #落書き終了時
@@ -309,7 +322,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 self.__mae_syori(data)
                 img_path = IMG_FOLDER_PATH + self.id + ".png"
                 print(str(self.client_address) + " -sendML- " + img_path)
-                time.sleep(1)
                 self.score = self.__send_ML(img_path)
                 print(str(self.client_address) + " -score- " + str(self.score))
                 self.__ato_syori(data)
@@ -359,6 +371,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def handle(self):
         #通信先のクライアント
         self.conn = conn
+
+        self.model = load_model(MODEL_PATH)
         self.cursor  = cursor
         self.client = self.request
         self.shinkoudo = 0
