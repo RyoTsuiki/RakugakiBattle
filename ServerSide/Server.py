@@ -40,8 +40,9 @@ ERROR           = "error"
 FINISH          = "finish"
 JOIN            = "join"
 CANCEL          = "cancel"
-KARI            = 404
+SCORE_TOTYU_KAZU= 3
 IMG_FOLDER_PATH = "../img/"
+DATA            = "data" 
 #サーバ側のホストとポート
 HOST, PORT      = "", 12345
 #お題データのファイル名
@@ -49,6 +50,7 @@ ODAI_TEXT_NAME  = "odai.txt"
 BATTLE_START    = "battle_start"
 BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
+REQ_SCORE       = "req_score"
 MODEL_PATH      = "../../standard/model.h5"
 label_path      = "../../standard/label.csv"
 #お題を取得
@@ -153,12 +155,10 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 where score IS NOT NULL) leaderboard
             where 	leaderboard.id = "{id}";
         ''').format(id = xp_id).strip()
-        print(sql)
         rank = 0
         try:
             self.cursor.execute(sql)
             res = self.cursor.fetchone()
-            print(res)
             rank = res[0]
         except MySQLdb.Error as e:
             print(e)
@@ -238,6 +238,15 @@ class SocketHandler(socketserver.BaseRequestHandler):
         my_message += self.id + ","
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
+    
+    #スコアの系列を送る
+    def __send_data(self, data):
+        my_message = DATA + ","
+        #メッセージ作成
+        for label, score in data.items(): 
+            my_message += "@".join([label, str(int(score*100))]) + ","
+        self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
 
     #結果を送信
     def __send_result(self, rank):
@@ -253,7 +262,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
         my_message = ERROR + ", " + error + ","
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
-        
 
     #前処理
     def __mae_syori(self, data):
@@ -261,15 +269,12 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        scores = predict.predict(self.model,img_path,label_path,raw_model_flag = True)
-        print(scores)
-        score = int(scores[self.odai] * 1000) 
-        return(score)
+        return predict.predict(self.model,img_path,label_path,raw_model_flag = True)
 
     #後処理
     def __ato_syori(self, data):
-        pass
-
+        score = int(data[self.odai] * 1000) 
+        return score
     #バトルの情報を送信
     def __send_battle_data(self,players):
         #メッセージ作成（game_data, お題, ID）
@@ -313,6 +318,10 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.odai,self.odai_japanese = self.__decide_odai()
             self.__send_game_data()
             self.__add_db_name()
+        #スコア要求時
+        elif reqest == REQ_SCORE:
+            data = self.__send_ML(IMG_FOLDER_PATH + self.id + ".png")
+            self.__send_data(data)
         #落書き終了時
         elif reqest == ENDGAME:
             if(self.shinkoudo <= 0):
@@ -322,9 +331,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 self.__mae_syori(data)
                 img_path = IMG_FOLDER_PATH + self.id + ".png"
                 print(str(self.client_address) + " -sendML- " + img_path)
-                self.score = self.__send_ML(img_path)
+                data = self.__send_ML(img_path)
+                self.score = self.__ato_syori(data)
                 print(str(self.client_address) + " -score- " + str(self.score))
-                self.__ato_syori(data)
                 self.__add_db_score()
                 if(self.my_room is None):
                     rank = self.search_rank_from_db(self.id)
