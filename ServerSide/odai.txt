@@ -1,4 +1,3 @@
 cat,ねこ
 dog,犬
-rabbit,うさぎ
-mouse,ねずみ
+car,車
