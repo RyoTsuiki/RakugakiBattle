@@ -85,7 +85,7 @@ def preprocessing(img_path):
     result = clipping_img(result, left, right, top, botom)
     print(left, right, top, botom)
     print("cut white")
-    #cv2.imwrite("22.jpg", result)
+    #cv2.imwrite("22.jpg", result)predict_proba
     # グレースケール変換
     result = cv2.cvtColor(result, cv2.COLOR_BGR2GRAY)
     print("convert gray")
@@ -111,6 +111,9 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     if prepro_flag: img = preprocessing(img_path)
     # 画像をグレースケールで読み込む
     else: img = cv2.imread(img_path,0)
+    #例外処理
+    if(img is None):
+        return None
     # 輝度値変換
     img = 255 - img
     # 画像の正規化

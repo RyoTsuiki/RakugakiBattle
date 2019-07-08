@@ -61,8 +61,7 @@ odai            = []
 for i in range(n):
     odai.append(odai_lines[i].split(","))
 ODAI            = odai.copy()
-
-
+ODAI_DE         = {classes: japan for classes, japan in ODAI}
 # 接続する
 conn = MySQLdb.connect(user='root',passwd='labmember',host='localhost',db='rakugaki_battle',charset='utf8')
 cursor = conn.cursor()
@@ -241,10 +240,11 @@ class SocketHandler(socketserver.BaseRequestHandler):
     
     #スコアの系列を送る
     def __send_data(self, data):
+        if(data is None): return 
         my_message = DATA + ","
         #メッセージ作成
         for label, score in data.items(): 
-            my_message += "@".join([label, str(int(score*100))]) + ","
+            my_message += "@".join([ODAI_DE[label], str(int(score*100))]) + ","
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
 
@@ -273,6 +273,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #後処理
     def __ato_syori(self, data):
+        if(data is None):
+            self.send_error("画像読み込み失敗")
+            return false
         score = int(data[self.odai] * 1000) 
         return score
     #バトルの情報を送信
