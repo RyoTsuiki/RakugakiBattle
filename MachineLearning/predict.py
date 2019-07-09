@@ -154,7 +154,7 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
         s = ""
         for j in range(28):
             if(img[i][j] > 0.5):s += "黒"
-            elif(img[i][j] > 0.01):s += "灰"
+            elif(img[i][j] > 0):s += "灰"
             else:s+= "　"
         print(s)
     return score_sorted
