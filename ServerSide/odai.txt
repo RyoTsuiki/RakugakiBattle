@@ -1,3 +1,10 @@
-cat,ねこ
-dog,犬
+axe, 軸
+airplane,飛行機
+apple,りんご
+banana,バナナ
+bicycle,自転車
 car,車
+donut,ドーナツ
+fish,魚
+hat,防止
+house,馬

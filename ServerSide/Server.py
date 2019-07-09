@@ -52,6 +52,7 @@ BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
 REQ_SCORE       = "req_score"
 MODEL_PATH      = "../../standard/model.h5"
+JAPAN_NAME_PATH = "../MachineLearning/class.txt"
 label_path      = "../../standard/label.csv"
 #お題を取得
 odai_txt        = open(ODAI_TEXT_NAME, "r", encoding = "utf-8")
@@ -59,9 +60,15 @@ odai_lines      = odai_txt.read().splitlines()
 n               = len(odai_lines)
 odai            = []
 for i in range(n):
-    odai.append(odai_lines[i].split(","))
+    odai.append(odai_lines[i].split(",")[0])
 ODAI            = odai.copy()
-ODAI_DE         = {classes: japan for classes, japan in ODAI}
+trance_txt      = open(JAPAN_NAME_PATH, "r", encoding = "utf-8")
+trance_lines    = trance_txt.read().splitlines()
+n               = len(trance_lines)
+trance          = []
+for i in range(n):
+    trance.append(trance_lines[i].split(","))
+ODAI_DE         = {classes: japan for classes, japan in trance}
 # 接続する
 conn = MySQLdb.connect(user='root',passwd='labmember',host='localhost',db='rakugaki_battle',charset='utf8')
 cursor = conn.cursor()
@@ -206,7 +213,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     #お題を決める
     def __decide_odai(self):
         odai_index = random.randint(0, (len(ODAI) - 1))
-        return( ODAI[odai_index][0] , ODAI[odai_index][1])
+        return( ODAI[odai_index])
 
 
     #ユーザーのIDを求める
@@ -233,7 +240,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __send_game_data(self):
         #メッセージ作成（game_data, お題, ID）
         my_message = GAMEDATA + ","
-        my_message += self.odai_japanese + ","
+        my_message += ODAI_DE[self.odai]+ ","
         my_message += self.id + ","
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
@@ -318,7 +325,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.shinkoudo = 1
             self.id = self.__create_id()
             self.name = messages[1]
-            self.odai,self.odai_japanese = self.__decide_odai()
+            self.odai = self.__decide_odai()
             self.__send_game_data()
             self.__add_db_name()
         #スコア要求時
