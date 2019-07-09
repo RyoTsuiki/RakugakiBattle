@@ -8,14 +8,15 @@ class np_load:
     def __init__(self, file_path="./data/"):
         self.X_DATA_SHAPE = (0, 28, 28, 1)
         self.Y_DATA_SHAPE = (0,)
+        self.PIXCEL = 28 * 28
         self.EXTENSION = ".npy"
         self.FILE_PATH = file_path
         # os ごとに __search_files() で使用する separator の値を自動で変化させる
         if os.name == "nt": self.separator = "\\" # windows
         else: self.separator = "/" # ubuntu を想定
         # 各data を空のnumpy配列で初期化
-        self.x_train = self.x_test = np.empty(self.X_DATA_SHAPE)
-        self.y_train = self.y_test = np.empty(self.Y_DATA_SHAPE)
+        self.x_train = self.x_test = self.x_val = np.empty(self.X_DATA_SHAPE)
+        self.y_train = self.y_test = self.y_val = np.empty(self.Y_DATA_SHAPE)
 
     def get_data_shape(self):
         '''
@@ -48,19 +49,21 @@ class np_load:
         return self.label
 
     def get_data(self):
-        return (self.x_train, self.y_train), (self.x_test, self.y_test)
+        return (self.x_train, self.y_train), (self.x_val, self.y_val), (self.x_test, self.y_test)
 
-    def load(self, validation_split=0.2, samples=1000, print_flag=True):
+    def load(self, train_samples=1000, val_samples=100, test_samples=100, print_flag=True):
         '''
-        label をもとにqwick draw dataset を読み込む
-        validation_split: 全データのうちテストデータの比率
-                        　小数点以下切り捨て
-        samples: 使用するデータ数 None を指定した場合すべてのデータを返す
-        print_flag: 進行状況を表示するフラグ True: 表示 False: 非表示
-                    デフォルト: True
+        label をもとにqwick draw dataset を読み込む.  
+        train_samples: 学習用に使用する画像データの枚数
+        val_samples: 検証用に使用する画像データの枚数
+        test_samples: テストに使用する画像データの枚数
+        print_flag: 進行状況を表示するフラグ. True: 表示 False: 非表示  
+                    デフォルト: True  
         戻り値: (x_train, y_train), (x_test, y_test)
         x_train: 学習に使用する画像データ(*,28,28,1) ndarray
         y_train: 学習に使用するラベル (*) ndarray
+        x_train: 検証に使用する画像データ(*,28,28,1) ndarray
+        y_train: 検証に使用するラベル (*) ndarray
         x_test: テストに使用する画像データ (*,28,28,1) ndarray
         y_test: テストに使用するラベル (*) ndarray
         '''
@@ -73,22 +76,22 @@ class np_load:
             # 元データの読み込み
             data = np.load(self.FILE_PATH + keys + self.EXTENSION)
             # 使用するデータ数になるよう調節
-            if not samples is None:
-                data = data[:samples,]
+            train = data[:train_samples,]
+            val = data[train_samples:(train_samples+val_samples)]
+            test = data[(train_samples+val_samples):(train_samples+val_samples+test_samples)]
             # ラベルの作成
-            classes = np.ones(shape=data.shape[0], dtype=np.int32)
+            classes = np.ones(shape=(train_samples+val_samples+test_samples), dtype=np.int32)
             classes *= values
-            if print_flag: print(keys, values, data.shape, classes.shape)
-            # 学習用データの枚数を計算
-            train_size = math.floor(len(data)*(1-validation_split))
+            if print_flag: 
+                print(f"{keys}, {values} : train_shape {train.shape} val_shape {val.shape} test_shape {test.shape}")
             # 各戻り値に合うようにデータを追加する
-            self.x_train = np.append(self.x_train, data[:train_size,]
-                    .reshape((train_size,) + self.get_data_shape()), axis=0)
-            self.y_train = np.append(self.y_train, classes[:train_size,], axis=0)
-            self.x_test = np.append(self.x_test, data[train_size:,]
-                    .reshape((len(data) - train_size,) + self.get_data_shape()), axis=0)
-            self.y_test = np.append(self.y_test, classes[train_size:,], axis=0)
-        return (self.x_train, self.y_train), (self.x_test, self.y_test)
+            self.x_train = np.append(self.x_train, train.reshape((train_samples,) + self.X_DATA_SHAPE[1:]), axis=0)
+            self.y_train = np.append(self.y_train, classes[:train_samples], axis=0)
+            self.x_val = np.append(self.x_val, val.reshape((val_samples,) + self.X_DATA_SHAPE[1:]), axis=0)
+            self.y_val = np.append(self.y_val, classes[:val_samples], axis=0)
+            self.x_test = np.append(self.x_test, test.reshape((test_samples,) + self.X_DATA_SHAPE[1:]), axis=0)
+            self.y_test = np.append(self.y_test, classes[:test_samples], axis=0)
+        return (self.x_train, self.y_train), (self.x_val, self.y_val), (self.x_test, self.y_test)
 
     def __search_files(self, print_flag=False):
         files = glob.glob(self.FILE_PATH + "*.npy")

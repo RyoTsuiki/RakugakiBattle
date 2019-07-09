@@ -1,4 +1,3 @@
-import np_load_class
 import datetime
 import time
 from tensorflow.python.keras.utils import to_categorical
@@ -8,19 +7,41 @@ from tensorflow.python.keras.layers import MaxPooling2D
 from tensorflow.python.keras.layers import Dropout
 from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.callbacks import TensorBoard, ReduceLROnPlateau
+from tensorflow.python.keras.callbacks import TensorBoard, ReduceLROnPlateau, CSVLogger
 from tensorflow.python.keras.models import save_model, load_model
 from tensorflow.python.keras.optimizers import Adam
 #from sklearn.metrics import confusion_matrix
 from sklearn.metrics import *
 import numpy as np
+import matplotlib.pyplot as plt
+
 
 class Train:
-    def set_parameter(self, epochs=20, split=0.2, samples=1000, firstlr=0.001):
+    def set_model_parameter(self, epochs=20, split=0.2, samples=1000, firstlr=0.001, callbacs=[], verbose=2):
         self.epochs = epochs
         self.split = split
         self.samples = samples
         self.firstlr = firstlr
+        self.callbacks = callbacs
+        self.verbose = verbose
+
+    def set_save_parameter(self, folder_pass="./", folder_name=None, tsb_flag=True,
+                           csvlog_flag=True, model_flag=True, info_flag=True, fig_flag=True):
+        self.folder_pass = folder_pass
+        self.folder_name = folder_name
+        if self.folder_name is None:
+            date = datetime.datetime.now()
+            self.folder_name = "{0:%Y_%m_%d_%H_%M_%S}".format(date)
+        if tsb_flag:
+            tsb = TensorBoard(log_dir=self.folder_pass+self.folder_name+"/log")
+            self.callbacks.append(tsb)
+        if csvlog_flag:
+            csv_logger = CSVLogger(
+                filename=self.folder_pass+folder_name+"/log.csv", separator=',', append=True)
+            self.callbacks.append(csv_logger)
+        self.model_flag = model_flag
+        self.info_flag = info_flag
+        self.fig_flag = fig_flag
 
     def set_data(self, data=None, print_flag=True):
         """
@@ -31,34 +52,43 @@ class Train:
                     True: 表示, False: 非表示
                     デフォルト: True
         """
-        (x_train, y_train), (x_test, y_test) = data.get_data()
+        (x_train, y_train), (x_val, y_val), (x_test, y_test) = data.get_data()
         self.x_train = x_train
         self.y_train = y_train
+        self.x_val = x_val
+        self.y_val = y_val
         self.x_test = x_test
         self.y_test = y_test
         self.data = data
         if print_flag:
             print("x_train.shape:", self.x_train.shape)
+            print("x_val.shape:", self.x_val.shape)
             print("x_test.shape:", self.x_test.shape)
+            
             print("y_train.shape:", self.y_train.shape)
+            print("y_val.shape:", self.y_val.shape)
             print("y_test.shape:", self.y_test.shape)
 
     def __pre(self):
         """
         データの前処理
         """
-        ## 特徴量の正規化
+        # 特徴量の正規化
         self.x_train = self.x_train/255.
         self.x_test = self.x_test/255.
-        ## クラスベクトルの1-hot ベクトル化
-        self.y_train = to_categorical(self.y_train, self.data.get_number_of_classes())
-        self.y_test = to_categorical(self.y_test, self.data.get_number_of_classes())
+        # クラスベクトルの1-hot ベクトル化
+        self.y_train = to_categorical(
+            self.y_train, self.data.get_number_of_classes())
+        self.y_val = to_categorical(
+            self.y_val, self.data.get_number_of_classes())
+        self.y_test = to_categorical(
+            self.y_test, self.data.get_number_of_classes())
 
     def __build_model(self):
-        ## モデル構築の準備
+        # モデル構築の準備
         self.model = Sequential()
 
-        ## 畳み込み層の追加 (1層目)
+        # 畳み込み層の追加 (1層目)
         self.model.add(
             Conv2D(
                 # 出力チャンネル数(特徴マップの数)
@@ -77,8 +107,8 @@ class Train:
             )
         )
 
-        ## 畳み込み層の追加 (2層目)
-        ## 2層目以降はkeras がinput_shape を自動計算するため省略可能
+        # 畳み込み層の追加 (2層目)
+        # 2層目以降はkeras がinput_shape を自動計算するため省略可能
         self.model.add(
             Conv2D(
                 # 出力チャンネル数(特徴マップの数)
@@ -95,14 +125,14 @@ class Train:
             )
         )
 
-        ## プーリング層の追加
+        # プーリング層の追加
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        ## ドロップアウトレイヤーの追加
+        # ドロップアウトレイヤーの追加
         self.model.add(Dropout(0.25))
 
-        ## 畳み込み層の追加 (3層目)
-        ## 2層目以降はkeras がinput_shape を自動計算するため省略可能
+        # 畳み込み層の追加 (3層目)
+        # 2層目以降はkeras がinput_shape を自動計算するため省略可能
         self.model.add(
             Conv2D(
                 # 出力チャンネル数(特徴マップの数)
@@ -119,8 +149,8 @@ class Train:
             )
         )
 
-        ## 畳み込み層の追加 (4層目)
-        ## 2層目以降はkeras がinput_shape を自動計算するため省略可能
+        # 畳み込み層の追加 (4層目)
+        # 2層目以降はkeras がinput_shape を自動計算するため省略可能
         self.model.add(
             Conv2D(
                 # 出力チャンネル数(特徴マップの数)
@@ -137,17 +167,17 @@ class Train:
             )
         )
 
-        ## プーリング層の追加
+        # プーリング層の追加
         self.model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        ## ドロップアウトレイヤーの追加
+        # ドロップアウトレイヤーの追加
         self.model.add(Dropout(0.25))
 
-        ## Flattenレイヤーの追加
-        ## 多次元のテンソルを2次元のテンソルに展開
+        # Flattenレイヤーの追加
+        # 多次元のテンソルを2次元のテンソルに展開
         self.model.add(Flatten())
 
-        ## 全結合層の追加
+        # 全結合層の追加
         self.model.add(
             Dense(
                 # ニューロンの数 (出力次元)
@@ -157,10 +187,10 @@ class Train:
             )
         )
 
-        ## ドロップアウトレイヤーの追加
+        # ドロップアウトレイヤーの追加
         self.model.add(Dropout(0.25))
 
-        ## 全結合層の追加
+        # 全結合層の追加
         self.model.add(
             Dense(
                 # ニューロンの数 (出力次元)
@@ -192,17 +222,34 @@ class Train:
             # モデルを訓練するためのエポック数
             epochs=self.epochs,
             # 検証データとして使用するトレーニングデータの割合
-            validation_split=self.split
+            validation_split=self.split,
+            # 検証用データの指定
+            validation_data=(self.x_val, self.y_val),
+            # シャッフル
+            shuffle=True,
+            # 表示設定
+            verbose=self.verbose,
             # コールバック関数 TensorBoard を使用する
-            #callbacks=[tsb]
+            callbacks=self.callbacks
             # コールバック関数 学習率も変化させる場合
             #callbacks=[tsb, reduce_lr]
         )
         # 時間の計測 ここまで
         self.elapsed_time = time.time() - start
         # 予測
-        self.predict_classes = self.model.predict_classes(self.x_test, batch_size=32)
-        self.true_classes = np.argmax(self.y_test,1)
+        self.predict_classes = self.model.predict_classes(
+            self.x_test, batch_size=32)
+        self.true_classes = np.argmax(self.y_test, 1)
+        # 保存
+        if self.model_flag:
+            self.model.save(self.folder_pass+self.folder_name+"/model.h5")
+            print("save model")
+        if self.info_flag:
+            self.data.save_info(
+                self.folder_pass+self.folder_name+"/info.txt", self.__create_info())
+            print("save info")
+        if self.fig_flag:
+            self.save_fig()
 
     def __create_info(self):
         info = "-"*10 + "info" + "-"*10 + "\n"
@@ -225,3 +272,28 @@ class Train:
 
     def print_info(self):
         print(self.__create_info())
+
+    def save_fig(self):
+        plt.plot(range(1, self.epochs+1),
+                 self.history_model.history['acc'], label="training")
+        plt.plot(range(1, self.epochs+1),
+                 self.history_model.history['val_acc'], label="validation")
+        plt.xlabel('Epochs')
+        plt.ylabel('Accuracy')
+        plt.legend()
+        # plt.show()
+        plt.savefig(self.folder_pass+self.folder_name+'/Accuracy.png')
+
+        plt.clf()
+
+        plt.plot(range(1, self.epochs+1),
+                 self.history_model.history['loss'], label="training")
+        plt.plot(range(1, self.epochs+1),
+                 self.history_model.history['val_loss'], label="validation")
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.legend()
+        # plt.show()
+        plt.savefig(self.folder_pass+self.folder_name+'/Loss.png')
+
+        plt.clf()
