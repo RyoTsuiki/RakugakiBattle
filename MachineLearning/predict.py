@@ -4,6 +4,7 @@ from tensorflow.python.keras.models import load_model
 import cv2
 import sys
 
+FILE_PATH = "/home/labmember/Desktop/teamb/standard/class_345/result.csv"
 
 def find_squares_gray(img):
     """
@@ -96,7 +97,7 @@ def preprocessing(img_path):
     print(left, right, top, botom)
     return result
 
-def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = False):
+def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = False, save_flag = False, odai = None):
     """
     推論した結果を辞書型に格納して返す関数
     model : 使用するモデルのパス
@@ -138,11 +139,21 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     if(not raw_model_flag):model = load_model(model)
     # 推論させる
     proba = model.predict_proba(img.reshape(1, 28, 28, 1))
+
+
     #print(proba)
     # ラベルのキーと値を反転させる
     label = {v: k for k, v in np_load.get_label(label_path).items()}
     # 推論結果をクラス名とその値をセットにした辞書型にする {class:score}
     score = {classes: score for classes, score in zip(label.values(), proba[0])}
+    if save_flag:
+        data = odai + ","
+        for value in score.values():
+            data += str(value) + ","
+        data += img_path
+        data += "\n"
+        with open(FILE_PATH,mode = "a") as f:
+            f.write(data)
     # score をもとに降順に並び替える
     score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
     # list -> dict

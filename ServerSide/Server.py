@@ -200,7 +200,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
         try:
             self.cursor.execute(sql)
             self.conn.commit() 
-            print("deleted{self.id}")
+            print("deleted{id}".format(id = self.id))
         except MySQLdb.Error as e:
             print(e)
             return False
@@ -276,13 +276,15 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
-        return predict.predict(self.model,img_path,label_path,raw_model_flag = True)
+        data = predict.predict(self.model,img_path,label_path,raw_model_flag = True,save_flag = self.save_flag,odai = self.odai)
+        print(data)
+        return data
 
     #後処理
     def __ato_syori(self, data):
         if(data is None):
             self.send_error("画像読み込み失敗")
-            return false
+            return False
         score = int(data[self.odai] * 1000) 
         return score
     #バトルの情報を送信
@@ -294,6 +296,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
         for player in players:
             my_message += player.name + ","
         self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
 
     def battle_start(self, room_odai, players):
             if(self.shinkoudo >= 1):
@@ -301,7 +304,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 self.send_error("リスタートされました")
 
             self.shinkoudo = 1
-            self.id = self.__create_id()
             self.odai = room_odai
             self.__add_db_name()
             self.__send_battle_data(players)
@@ -341,7 +343,12 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 self.__mae_syori(data)
                 img_path = IMG_FOLDER_PATH + self.id + ".png"
                 print(str(self.client_address) + " -sendML- " + img_path)
-                data = self.__send_ML(img_path)
+                self.save_flag = True
+                while True:
+                    data = self.__send_ML(img_path)
+                    if(not data is None): break
+                    time.sleep(0.02)
+                self.save_flag = False
                 self.score = self.__ato_syori(data)
                 print(str(self.client_address) + " -score- " + str(self.score))
                 self.__add_db_score()
@@ -357,19 +364,24 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.__send_ranking()
         #バトル開始時
         elif reqest == BATTLE_START:
+            if(self.shinkoudo > 0):
+                self.__db_delete()
+                self.shinkoudo = 0
             if(not(self.my_room is None)): 
                 self.send_error("すでに開始されています")
                 return
             self.name = messages[1]
+            self.id = self.__create_id()
+            self.shinkoudo = 0.5
             SocketHandler.haita.acquire()
             if(room.Room.waiting is None):
                 self.my_room = room.Room(self)
                 print(str(self.client_address) + " -roomMake- ")
-                self.client.sendall(b"waiting")
+                self.client.sendall(b"waiting,")
             else:
                 self.my_room = room.Room.waiting.add_prayer(self)
                 print(str(self.client_address) + " -roomAdd- ")
-                self.client.sendall(b"added")
+                self.client.sendall(b"added,")
             SocketHandler.haita.release()
         #バトルキャンセル時
         elif reqest == BATTLE_CANCEL:
@@ -390,7 +402,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def handle(self):
         #通信先のクライアント
         self.conn = conn
-
+        self.save_flag = False
         self.model = load_model(MODEL_PATH)
         self.cursor  = cursor
         self.client = self.request
