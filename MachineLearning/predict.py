@@ -26,7 +26,9 @@ def find_squares_color(img, b, g, r):
     '''
     ある特定のRGB値の部分を切り取る関数
     img : 切り取る前のカラー画像 ndarray
-    b : 青の
+    b : 青の輝度値
+    g : 緑の輝度値
+    r : 赤の輝度値
     '''
     left = right = top = botom = 0
     x = []

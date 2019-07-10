@@ -3,6 +3,7 @@ import math
 import glob
 import csv
 import os
+import random
 
 class np_load:
     def __init__(self, file_path="./data/"):
@@ -91,6 +92,16 @@ class np_load:
             self.y_val = np.append(self.y_val, classes[:val_samples], axis=0)
             self.x_test = np.append(self.x_test, test.reshape((test_samples,) + self.X_DATA_SHAPE[1:]), axis=0)
             self.y_test = np.append(self.y_test, classes[:test_samples], axis=0)
+        # train データのみシャッフル
+        idx = list(range(len(self.x_train)))
+        random.shuffle(idx)
+        x_train = [self.x_train[i] for i in idx]
+        y_train = [self.y_train[i] for i in idx]
+        self.x_train = np.array(x_train)
+        self.y_train = np.array(y_train)
+        #print("np_load x", self.x_train.shape)
+        #print("np_load y", self.y_train.shape)
+            
         return (self.x_train, self.y_train), (self.x_val, self.y_val), (self.x_test, self.y_test)
 
     def __search_files(self, print_flag=False):
