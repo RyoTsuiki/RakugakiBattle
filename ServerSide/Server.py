@@ -381,7 +381,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
             else:
                 self.my_room = room.Room.waiting.add_prayer(self)
                 print(str(self.client_address) + " -roomAdd- ")
-                self.client.sendall(b"added,")
             SocketHandler.haita.release()
         #バトルキャンセル時
         elif reqest == BATTLE_CANCEL:

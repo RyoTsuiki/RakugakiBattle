@@ -117,10 +117,23 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     #例外処理
     if(img is None):
         return None
+    # 画像のリサイズ(縦横比を保ち長い方を140に)
+    org_lens = np.shape(img)
+
     # 輝度値変換
     img = 255 - img
-    # 画像の正規化
-    img = img / 255.
+
+    #一度140にリサイズして膨張処理
+    if(org_lens[0] < org_lens[1]):
+        img = cv2.resize(img, (140, min(org_lens[0]*140//org_lens[1]+1,140)))
+    else:
+        img = cv2.resize(img, (min(org_lens[1]*140//org_lens[0]+1,140),140))
+    # 二値変換
+    img[img<=0] = 0
+    img[img>0] = 255
+    img = cv2.dilate(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 2)
+    org_lens = np.shape(img)
+
     # 画像のリサイズ(縦横比を保ち長い方を28に)
     org_lens = np.shape(img)
     if(org_lens[0] < org_lens[1]):
@@ -136,14 +149,16 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
         for j in range(aft_lens[1]):
             imgback[i+sy][j+sx] += img[i][j]
     img = imgback
-    #print(img.shape)
+    
+    # 画像の正規化
+    img = img / 255.
+
     # モデルの読み込み
     if(not raw_model_flag):model = load_model(model)
+
     # 推論させる
     proba = model.predict_proba(img.reshape(1, 28, 28, 1))
 
-
-    #print(proba)
     # ラベルのキーと値を反転させる
     label = {v: k for k, v in np_load.get_label(label_path).items()}
     # 推論結果をクラス名とその値をセットにした辞書型にする {class:score}
@@ -164,12 +179,12 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     for i in range(28):
         s = ""
         for j in range(28):
-            if(img[i][j] > 0.5):s += "黒"
-            elif(img[i][j] > 0):s += "灰"
-            else:s+= "　"
+            if(img[i][j] == 1):s += "黒"
+            elif(img[i][j] ==0):s += "　"
+            else:s+= "灰"
         print(s)
     return score_sorted
-
+    print(img)
 if __name__ == "__main__":
     args = sys.argv[1:]
     print(predict(args[0], args[1], args[2], True))
