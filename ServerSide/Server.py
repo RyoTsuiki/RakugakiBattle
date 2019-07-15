@@ -151,6 +151,21 @@ class SocketHandler(socketserver.BaseRequestHandler):
             print(e)
             return False
 
+    #データベースからスコアのある人数を求める
+    def search_db_player_count(self):
+        sql = textwrap.dedent('''
+            SELECT COUNT(score) FROM player_data;
+        ''').strip()
+        rank = 0
+        try:
+            self.cursor.execute(sql)
+            res = self.cursor.fetchone()
+            count = res[0]
+        except MySQLdb.Error as e:
+            print(e)
+            return False
+
+        return count
     #データベースから順位を求める
     def search_rank_from_db(self, xp_id):
         sql = textwrap.dedent('''
@@ -256,11 +271,11 @@ class SocketHandler(socketserver.BaseRequestHandler):
         print("send:  " + my_message)
 
     #結果を送信
-    def __send_result(self, rank):
+    def __send_result(self, rank, count):
         my_message = RESULT + ","
         my_message += str(self.score) + ","
         my_message += str(rank) + ","
-
+        my_message += str(count) + ","
         self.client.sendall(my_message.encode())
         print("send:  " + my_message)
 
@@ -291,7 +306,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
     def __send_battle_data(self,players):
         #メッセージ作成（game_data, お題, ID）
         my_message = BATTLEDATA + ","
-        my_message += self.odai + ","
+        my_message += ODAI_DE[self.odai] + ","
         my_message += self.id + ","
         for player in players:
             my_message += player.name + ","
@@ -309,10 +324,29 @@ class SocketHandler(socketserver.BaseRequestHandler):
             self.__send_battle_data(players)
 
     def battle_end(self,scores):
+        count = self.search_db_player_count()
         my_message = BATTLEEND + ","
+        
+            
+        #自分のデータのインデックス
+        for i in range(len(scores)):
+            if(scores[i][2] == self.id):
+                my_message += str(i) + ","
+                if(scores[0][0] == scores[1][0]):
+                    my_message += "Draw"
+                else:
+                    if(i == 0):
+                        my_message += "WIN"
+                    else:
+                        my_message += "Lose"
+                my_message += ","
+                break
+        my_message += str(count) + ","
         for player_rs in scores:
-            my_message += "@".join(map(str,([player_rs[0],player_rs[1],player_rs[2],player_rs[3]]))) + ","
+            my_message += "@".join(map(str,(player_rs))) + ","
         self.client.sendall(my_message.encode())
+        print("send:  " + my_message)
+        self.shinkoudo = 0
         self.my_room = None
     #送られてきたメッセージを解釈する
     def __Interpretation_message(self, message):
@@ -354,7 +388,8 @@ class SocketHandler(socketserver.BaseRequestHandler):
                 self.__add_db_score()
                 if(self.my_room is None):
                     rank = self.search_rank_from_db(self.id)
-                    self.__send_result(rank)
+                    count = self.search_db_player_count()
+                    self.__send_result(rank, count)
                     self.shinkoudo = 0
                 else:
                     self.my_room.add_result(self)

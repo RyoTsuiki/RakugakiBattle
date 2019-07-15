@@ -42,8 +42,11 @@ class Room():
     #インスタンスにバトル結果を伝える
     def battle_end(self, player):
         print(self.scores)
+        self.scores.sort(key=lambda x:x[0])
+        self.scores.reverse()
         for i in range(len(self.scores)):
-            self.scores[i].append(server.SocketHandler.search_rank_from_db(player,self.scores[i][2]))
+            self.scores[i].append(Server.SocketHandler.search_rank_from_db(player,self.scores[i][2]))
+
         for player in self.players:
             player.battle_end(self.scores)
 

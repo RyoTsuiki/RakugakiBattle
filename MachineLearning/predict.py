@@ -4,7 +4,7 @@ from tensorflow.python.keras.models import load_model
 import cv2
 import sys
 
-FILE_PATH = "/home/labmember/Desktop/teamb/standard/class_345/result.csv"
+FILE_PATH = "../model/tuned_result.csv"
 
 def find_squares_gray(img):
     """
@@ -128,9 +128,10 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
         img = cv2.resize(img, (140, min(org_lens[0]*140//org_lens[1]+1,140)))
     else:
         img = cv2.resize(img, (min(org_lens[1]*140//org_lens[0]+1,140),140))
-    # 二値変換
-    img[img<=0] = 0
-    img[img>0] = 255
+    # 二値変換(0は0、1以上は255)
+    img[img<=120] = 0
+    img[img>120] = 255
+    #膨張処理
     img = cv2.dilate(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 2)
     org_lens = np.shape(img)
 
@@ -153,7 +154,7 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     # 画像の正規化
     img = img / 255.
 
-    # モデルの読み込み
+    # モデルの読み込み膨張処理
     if(not raw_model_flag):model = load_model(model)
 
     # 推論させる
