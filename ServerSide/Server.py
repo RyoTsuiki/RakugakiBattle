@@ -41,7 +41,7 @@ FINISH          = "finish"
 JOIN            = "join"
 CANCEL          = "cancel"
 SCORE_TOTYU_KAZU= 3
-IMG_FOLDER_PATH = "/home/labmember/Desktop/teamb/RakugakiBattle/img"
+IMG_FOLDER_PATH = "../../RakugakiBattle/img/"
 DATA            = "data" 
 #サーバ側のホストとポート
 HOST, PORT      = "", 12345
