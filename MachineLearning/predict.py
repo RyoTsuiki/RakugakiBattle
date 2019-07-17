@@ -128,7 +128,7 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
         img = cv2.resize(img, (140, min(org_lens[0]*140//org_lens[1]+1,140)))
     else:
         img = cv2.resize(img, (min(org_lens[1]*140//org_lens[0]+1,140),140))
-    # 二値変換(0は0、1以上は255)
+    # 二値変換(120以下は0 超過は255)
     img[img<=120] = 0
     img[img>120] = 255
     #膨張処理

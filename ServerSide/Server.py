@@ -51,9 +51,9 @@ BATTLE_START    = "battle_start"
 BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
 REQ_SCORE       = "req_score"
-MODEL_PATH      = "../../standard/model.h5"
+MODEL_PATH      = "../model/model.h5"
 JAPAN_NAME_PATH = "../MachineLearning/class.txt"
-label_path      = "../../standard/label.csv"
+label_path      = "../model/label.csv"
 #お題を取得
 odai_txt        = open(ODAI_TEXT_NAME, "r", encoding = "utf-8")
 odai_lines      = odai_txt.read().splitlines()
@@ -300,8 +300,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
         if(data is None):
             self.send_error("画像読み込み失敗")
             return False
-        score = int(data[self.odai] * 1000) 
-        return score
+        score = (data[self.odai] * 100)
+        return float('{:.5g}'.format(score))
+
     #バトルの情報を送信
     def __send_battle_data(self,players):
         #メッセージ作成（game_data, お題, ID）
