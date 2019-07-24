@@ -1,10 +1,7 @@
 axe, 軸
 airplane,飛行機
-apple,りんご
-banana,バナナ
 bicycle,自転車
 car,車
-donut,ドーナツ
 fish,魚
-hat,防止
-house,馬
+pencil,鉛筆
+house,家
