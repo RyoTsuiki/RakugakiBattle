@@ -176,14 +176,14 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     # score をもとに降順に並び替える
     score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
     ####################################
-    
+    """
     if save_flag:
         ac_class , buf = score_sorted[0]
         buf = {"odai": odai, "pre": ac_class}
         buf.update(score)
         print(buf)
         throw_request.post_request(data=buf, model="model2")
-    
+    """
     #####################################
     # list -> dict
     score_sorted = {classes: score for classes, score in score_sorted}

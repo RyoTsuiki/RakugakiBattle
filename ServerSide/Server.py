@@ -461,6 +461,10 @@ class SocketHandler(socketserver.BaseRequestHandler):
         pass
 
 if __name__ == "__main__":
+    print("使用するPott番号を入力してください(スキップする場合は何もせずエンター)")
+    port = input()
+    #ポートが入力されなければデフォルトのポート番号を使用
+    if(len(port) == 0): port = PORT
     server = socketserver.ThreadingTCPServer((HOST, PORT), SocketHandler)
     print("listen" + str((HOST, PORT)))
     server.serve_forever()
