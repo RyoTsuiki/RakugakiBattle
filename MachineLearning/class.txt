@@ -5,7 +5,7 @@ ambulance,救急車
 angel,天使
 animal migration,動物の移動
 ant,蟻
-anvil,アンビル
+anvil,鉄床
 apple,林檎
 arm,腕
 asparagus,アスパラガス
@@ -46,9 +46,9 @@ broom,ほうき
 bucket,バケツ
 bulldozer,ブルドーザー
 bus,バス
-bush,ブッシュ
-butterfly,バタフライ
-cactus,カクタス
+bush,茂み
+butterfly,ちょうちょ
+cactus,サボテン
 cake,ケーキ
 calculator,電卓
 calendar,カレンダー
@@ -63,7 +63,7 @@ car,車
 carrot,にんじん
 castle,城
 cat,ネコ
-ceiling fan,天井ファン
+ceiling fan,天井扇風機
 cello,チェロ
 cell phone,携帯電話
 chair,椅子
@@ -71,7 +71,7 @@ chandelier,シャンデリア
 church,教会
 circle,サークル
 clarinet,クラリネット
-clock,クロック
+clock,時計
 cloud,雲
 coffee cup,コーヒーカップ
 compass,コンパス
@@ -83,12 +83,12 @@ cow,牛
 crab,カニ
 crayon,クレヨン
 crocodile,クロコダイル
-crown,クラウン
+crown,王冠
 cruise ship,クルーズ船
 cup,カップ
 diamond,ダイヤモンド
 dishwasher,食器洗い機
-diving board,ダイビングボード
+diving board,飛び板
 dog,犬
 dolphin,イルカ
 donut,ドーナツ
@@ -102,13 +102,13 @@ dumbbell,ダンベル
 ear,耳
 elbow,肘
 elephant,象
-envelope,エンベロープ
+envelope,封筒
 eraser,消しゴム
 eye,眼
 eyeglasses,めがね
 face,面
-fan,ファン
-feather,フェザー
+fan,扇風機
+feather,羽毛
 fence,フェンス
 finger,指
 fire hydrant,消火栓
@@ -192,7 +192,7 @@ mountain,山
 mouse,マウス
 moustache,口ひげ
 mouth,口
-mug,マグ
+mug,マグカップ
 mushroom,キノコ
 nail,爪
 necklace,ネックレス
@@ -238,7 +238,7 @@ raccoon,ラクーン
 radio,無線
 rain,雨
 rainbow,虹
-rake,レーキ
+rake,くま手
 remote control,リモコン
 rhinoceros,サイ
 rifle,ライフル
@@ -247,14 +247,14 @@ roller coaster,ジェットコースター
 rollerskates,ローラースケート
 sailboat,ヨット
 sandwich,サンドイッチ
-saw,見た
+saw,ノコギリ
 saxophone,サックス
 school bus,スクールバス
 scissors,はさみ
 scorpion,サソリ
 screwdriver,ドライバー
 sea turtle,ウミガメ
-see saw,見た
+see saw,シーソー
 shark,鮫
 sheep,羊
 shoe,靴
@@ -269,7 +269,7 @@ smiley face,笑顔
 snail,かたつむり
 snake,ヘビ
 snorkel,スノーケル
-snowflake,スノーフレーク
+snowflake,雪の結晶
 snowman,雪だるま
 soccer ball,サッカーボール
 sock,靴下

@@ -1,5 +1,6 @@
 axe, 軸
 airplane,飛行機
+apple,りんご
 banana,バナナ
 bicycle,自転車
 car,車
