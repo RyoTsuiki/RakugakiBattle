@@ -51,7 +51,7 @@ BATTLE_START    = "battle_start"
 BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
 REQ_SCORE       = "req_score"
-MODEL_PATH      = "../model/model.h5"
+MODEL_PATH      = "../model/model_best.h5"
 JAPAN_NAME_PATH = "../MachineLearning/class.txt"
 label_path      = "../model/label.csv"
 #お題を取得
