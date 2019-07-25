@@ -40,7 +40,7 @@ bowtie,ちょうネクタイ
 bracelet,ブレスレット
 brain,脳
 bread,パン
-bridge,ブリッジ
+bridge,橋
 broccoli,ブロッコリ
 broom,ほうき
 bucket,バケツ
@@ -52,7 +52,7 @@ cactus,サボテン
 cake,ケーキ
 calculator,電卓
 calendar,カレンダー
-camel,キャメル
+camel,らくだ
 camera,カメラ
 camouflage,迷彩
 campfire,キャンプファイヤー
@@ -69,7 +69,7 @@ cell phone,携帯電話
 chair,椅子
 chandelier,シャンデリア
 church,教会
-circle,サークル
+circle,まる
 clarinet,クラリネット
 clock,時計
 cloud,雲
@@ -94,7 +94,7 @@ dolphin,イルカ
 donut,ドーナツ
 door,ドア
 dragon,ドラゴン
-dresser,ドレッサー
+dresser,たんす
 drill,ドリル
 drums,ドラム
 duck,アヒル
@@ -135,7 +135,7 @@ grass,草
 guitar,ギター
 hamburger,ハンバーガー
 hammer,ハンマー
-hand,ハンド
+hand,手
 harp,ハープ
 hat,帽子
 headphones,ヘッドホン
@@ -145,11 +145,11 @@ helmet,ヘルメット
 hexagon,六角形
 hockey puck,アイスホッケー用パック
 hockey stick,ホッケースティック
-horse,うま
+horse,馬
 hospital,病院
 hot air balloon,熱気球
 hot dog,ホットドッグ
-hot tub,ホットタブ
+hot tub,温水浴槽
 hourglass,砂時計
 house,家
 house plant,家の植物
@@ -162,7 +162,7 @@ key,キー
 keyboard,キーボード
 knee,膝
 knife,ナイフ
-ladder,ラダー
+ladder,はしご
 lantern,灯籠
 laptop,ノートパソコン
 leaf,葉
@@ -170,8 +170,8 @@ leg,脚
 light bulb,電球
 lighter,ライター
 lighthouse,灯台
-lightning,ライトニング
-line,ライン
+lightning,雷
+line,線
 lion,ライオン
 lipstick,口紅
 lobster,ロブスター
@@ -182,7 +182,7 @@ marker,マーカー
 matches,マッチ
 megaphone,メガホン
 mermaid,マーメイド
-microphone,マイクロフォン
+microphone,マイク
 microwave,電子レンジ
 monkey,モンキー
 moon,月
@@ -234,7 +234,7 @@ potato,じゃがいも
 power outlet,電源コンセント
 purse,財布
 rabbit,ウサギ
-raccoon,ラクーン
+raccoon,あらいぐま
 radio,ラジオ
 rain,雨
 rainbow,虹
