@@ -51,9 +51,9 @@ BATTLE_START    = "battle_start"
 BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
 REQ_SCORE       = "req_score"
-MODEL_PATH      = "../model/model_best.h5"
+MODEL_PATH      = "../model/model_3000_best.h5"
 JAPAN_NAME_PATH = "../MachineLearning/class.txt"
-label_path      = "../model/label.csv"
+label_path      = "../model/tsuiki_label.csv"
 #お題を取得
 odai_txt        = open(ODAI_TEXT_NAME, "r", encoding = "utf-8")
 odai_lines      = odai_txt.read().splitlines()
