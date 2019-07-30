@@ -126,25 +126,16 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
 
     #一度140にリサイズして膨張処理
     if(org_lens[0] < org_lens[1]):
-        img = cv2.resize(img, (140, min(org_lens[0]*140//org_lens[1]+1,140)))
+        img = cv2.resize(img, (130, min(org_lens[0]*130//org_lens[1]+1,130)))
     else:
-        img = cv2.resize(img, (min(org_lens[1]*140//org_lens[0]+1,140),140))
+        img = cv2.resize(img, (min(org_lens[1]*130//org_lens[0]+1,130),130))
     # 二値変換(120以下は0 超過は255)
     img[img<=120] = 0
     img[img>120] = 255
-    #線の太さを求める
-    hutosa = (26*15/max(org_lens))
-    if(hutosa > 7):
-        #収縮処理
-        while(hutosa > 7):
-            img = cv2.erode(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 1)
-            hutosa -= 2 
-    else:
-        #膨張処理
-        while(hutosa < 5):
-            img = cv2.dilate(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 1)
-            hutosa += 2 
-            
+
+    #膨張処理
+    img = cv2.dilate(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 2)
+    
     org_lens = np.shape(img)
     # 画像のリサイズ(縦横比を保ち長い方を26に)
     org_lens = np.shape(img)
