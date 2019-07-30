@@ -51,7 +51,7 @@ BATTLE_START    = "battle_start"
 BATTLE_CANCEL   = "battle_cancel"
 BATTLEEND       = "battle_end"
 REQ_SCORE       = "req_score"
-MODEL_PATH      = "../model/model_3000_best.h5"
+MODEL_PATH      = "../model/7000model.h5"
 JAPAN_NAME_PATH = "../MachineLearning/class.txt"
 label_path      = "../model/tsuiki_label.csv"
 #お題を取得
@@ -462,11 +462,12 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
 if __name__ == "__main__":
     print("使用するPott番号を入力してください(スキップする場合は何もせずエンター)")
-    port = input()
+    inp = input()
     #ポートが入力されなければデフォルトのポート番号を使用
-    if(len(port) == 0): port = PORT
-    server = socketserver.ThreadingTCPServer((HOST, PORT), SocketHandler)
-    print("listen" + str((HOST, PORT)))
+    if(len(inp) <= 0): port = PORT
+    else: port = int(inp)
+    server = socketserver.ThreadingTCPServer((HOST, port), SocketHandler)
+    print("listen" + str((HOST, port)))
     server.serve_forever()
     
 
