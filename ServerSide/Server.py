@@ -125,7 +125,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             UPDATE player_data
             SET name = "{name}", odai = "{odai}"
             WHERE id = "{id}";
-        ''').format(id = self.id, name = self.name, odai = self.odai).strip()
+        ''').format(id = self.id, name = self.name, odai = ODAI_DE[self.odai]).strip()
 
         try:
             count = self.cursor.execute(sql)
