@@ -1,3 +1,5 @@
 tree,木
 bicycle,自転車
 cat,猫
+remote control,リモコン
+laptop,ノートパソコン

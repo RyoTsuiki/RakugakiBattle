@@ -192,7 +192,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
             select rank()OVER(ORDER BY score DESC) as "rank", player_data.*
             from player_data
             where score IS NOT NULL
-            LIMIT 999;
+            LIMIT 100;
         """).strip()
 
         try:
