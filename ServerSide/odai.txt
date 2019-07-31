@@ -1,7 +1,6 @@
-axe, 軸
 airplane,飛行機
 bicycle,自転車
 car,車
-fish,魚
+cat,猫
 pencil,鉛筆
 house,家
