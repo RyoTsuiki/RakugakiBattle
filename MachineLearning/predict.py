@@ -123,25 +123,33 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
 
     # 輝度値変換
     img = 255 - img
-    #一度140にリサイズして膨張処理
+    #縮小倍率を決める
+    bairitsu = 1
+    while (max(org_lens)>208):
+        now_len = max(org_lens)/bairitsu
+        if(now_len < 208): break
+        bairitsu += 1
+    if(bairitsu != 1): bairitsu += 1
+    dict_len = max(org_lens)//bairitsu
+    #一度リサイズ
     if(org_lens[0] < org_lens[1]):
-        img = cv2.resize(img, (260, min(org_lens[0]*260//org_lens[1]+1,260)))
+        img = cv2.resize(img, (dict_len, min(org_lens[0]*dict_len//org_lens[1]+1,dict_len)))
     else:
-        img = cv2.resize(img, (min(org_lens[1]*260//org_lens[0]+1,260),260))
+        img = cv2.resize(img, (min(org_lens[1]*dict_len//org_lens[0]+1,dict_len),dict_len))
     # 二値変換(120以下は0 超過は255)
-
+    hi = 26/dict_len
     #線の太さを求める
-    hutosa = (15*260/max(org_lens))
-    if(hutosa > 12):
+    hutosa = (15*26/max(org_lens))
+    if(hutosa > 1.5):
         #収縮処理
-        while(hutosa > 7):
+        while(hutosa > (1.2+2*hi)):
             img = cv2.erode(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 1)
-            hutosa -= 2 
+            hutosa -= 2*hi
     else:
         #膨張処理
-        while(hutosa < 10):
+        while(hutosa < 1):
             img = cv2.dilate(img, kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3, 3)),iterations = 1)
-            hutosa += 2 
+            hutosa += 2*hi
 
     org_lens = np.shape(img)
     # 画像のリサイズ(縦横比を保ち長い方を26に)
@@ -159,6 +167,7 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
         for j in range(aft_lens[1]):
             imgback[i+sy][j+sx] += img[i][j]
     img = imgback
+    print(str(img))
     # 画像の正規化
     img = img / 255.
 

@@ -106,7 +106,7 @@ envelope,封筒
 eraser,消しゴム
 eye,眼
 eyeglasses,めがね
-face,面
+face,顔
 fan,扇風機
 feather,羽毛
 fence,フェンス
@@ -285,7 +285,7 @@ star,星
 steak,ステーキ
 stereo,ステレオ
 stethoscope,聴診器
-stitches,ステッチ
+stitches,聴診器
 stop sign,一時停止標識
 stove,レンジ
 strawberry,イチゴ

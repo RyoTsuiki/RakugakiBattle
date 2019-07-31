@@ -1,6 +1,3 @@
-airplane,飛行機
+tree,木
 bicycle,自転車
-car,車
 cat,猫
-pencil,鉛筆
-house,家
