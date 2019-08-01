@@ -268,7 +268,6 @@ class SocketHandler(socketserver.BaseRequestHandler):
         for label, score in data.items(): 
             my_message += "@".join([ODAI_DE[label], str(int(score*100))]) + ","
         self.client.sendall(my_message.encode())
-        print("send:  " + my_message)
 
     #結果を送信
     def __send_result(self, rank, count):
@@ -291,6 +290,7 @@ class SocketHandler(socketserver.BaseRequestHandler):
 
     #推論機に画像のpathを与えてスコアを得る
     def __send_ML(self, img_path):
+        if(self.shinkoudo < 1): return None
         data = predict.predict(self.model,img_path,label_path,raw_model_flag = True,save_flag = self.save_flag,odai = self.odai)
         print(data)
         return data
@@ -413,16 +413,14 @@ class SocketHandler(socketserver.BaseRequestHandler):
             if(room.Room.waiting is None):
                 self.my_room = room.Room(self)
                 print(str(self.client_address) + " -roomMake- ")
-                self.client.sendall(b"waiting,")
+                self.client.sendall(b"wasend_dataiting,")
             else:
                 self.my_room = room.Room.waiting.add_prayer(self)
                 print(str(self.client_address) + " -roomAdd- ")
             SocketHandler.haita.release()
         #バトルキャンセル時
         elif reqest == BATTLE_CANCEL:
-            if self.shinkoudo >= 1:
-                self.send_error("バトルが開始されています")
-            elif self.my_room is None:
+            if self.my_room is None:
                 self.send_error("部屋を立てていません")
             else:
                 self.my_room.cancel()
@@ -451,7 +449,9 @@ class SocketHandler(socketserver.BaseRequestHandler):
             print(str(self.client_address) + " - " + message)
             if message == DISCONNECT or message == "":
                 print("disconnected")
-                if(not self.my_room is None):   self.my_room.cancel()
+                if(not (self.my_room is None)):   
+                    self.my_room.cancel()
+                    print("cclal")
                 self.client.sendall(DISCONNECT.encode())
                 SocketHandler.haita.release()
                 break
@@ -470,7 +470,6 @@ if __name__ == "__main__":
     print("listen" + str((HOST, port)))
     server.serve_forever()
     
-
 
 
 

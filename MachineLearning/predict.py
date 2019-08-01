@@ -167,7 +167,6 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
         for j in range(aft_lens[1]):
             imgback[i+sy][j+sx] += img[i][j]
     img = imgback
-    print(str(img))
     # 画像の正規化
     img = img / 255.
 

@@ -164,7 +164,7 @@ knee,膝
 knife,ナイフ
 ladder,はしご
 lantern,灯籠
-laptop,ノートパソコン
+laptop,ノートPC
 leaf,葉
 leg,脚
 light bulb,電球
@@ -208,7 +208,7 @@ paint can,ペンキの缶
 palm tree,ヤシの木
 panda,パンダ
 pants,ズボン
-paper clip,ペーパークリップ
+paper clip,クリップ
 parachute,パラシュート
 parrot,オウム
 passport,パスポート

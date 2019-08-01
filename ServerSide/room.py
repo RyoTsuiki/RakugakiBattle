@@ -19,7 +19,9 @@ class Room():
             return self
         elif(len(self.players) > Room.MAX_PLAYER):
             added_player.send_error("roomerroroverplayer")
-            return Room(added_player)
+            newRoom = Room(added_player)
+            waiting = newRoom
+            return Room(newRoom)
     #インスタンスにバトル開始を伝える
     def battle_start(self):
         Room.waiting = None
@@ -52,4 +54,5 @@ class Room():
 
     #cancell 
     def cancel(self):
-        Room.waiting = None
+        if(self == Room.waiting):
+            Room.waiting = None
