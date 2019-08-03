@@ -1,3 +1,9 @@
+"""
+非推奨
+dataset を読み込むプログラム
+train.py にて使用
+"""
+
 import numpy as np
 import math
 import glob

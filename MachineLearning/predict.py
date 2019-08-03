@@ -1,3 +1,10 @@
+"""推論を行うプログラム.
+
+サーバーから投げられた画像をもとに推論を行う.
+推論後は結果を辞書形式で返す
+ソースコード内一部のコメントアウトを外すことによってflask_project と連携可能
+
+"""
 import np_load
 import numpy as np
 from tensorflow.python.keras.models import load_model
@@ -192,17 +199,22 @@ def predict(model, img_path, label_path, prepro_flag = False, raw_model_flag = F
     score_sorted = sorted(score.items(), key=lambda x:x[1], reverse=True)
     ####################################
     """
+    # flask_project にデータを投げるプログラム
+    # 使用しない場合このブロックをコメントアウトすればよい
+    # throw_request.py と依存関係がある
+    # また, flask_project が起動している必要がある
     if save_flag:
         ac_class , buf = score_sorted[0]
         buf = {"odai": odai, "pre": ac_class}
         buf.update(score)
         print(buf)
         throw_request.post_request(data=buf, model="model2")
+    # ここまで
     """
     #####################################
     # list -> dict
     score_sorted = {classes: score for classes, score in score_sorted}
-    
+
     #読み込んだ画像表示
     for i in range(28):
         s = ""

@@ -1,3 +1,14 @@
+"""quick draw dataset をnumpy形式で読み込むプログラム.
+
+データセットをnumpy 形式で読み込む
+指定したファイルパスからデータを読み取る
+この時同一ディレクトリ内の.npy ファイルをすべて読み込む
+このファイル数は動的に判断し読み込む
+その後ラベルも作成する(これも数に依存しない)
+
+このクラスの使用例は train_class.py 参照
+"""
+
 import numpy as np
 import math
 import glob
@@ -54,12 +65,12 @@ class np_load:
 
     def load(self, train_samples=1000, val_samples=100, test_samples=100, print_flag=True):
         '''
-        label をもとにqwick draw dataset を読み込む.  
+        label をもとにqwick draw dataset を読み込む.
         train_samples: 学習用に使用する画像データの枚数
         val_samples: 検証用に使用する画像データの枚数
         test_samples: テストに使用する画像データの枚数
-        print_flag: 進行状況を表示するフラグ. True: 表示 False: 非表示  
-                    デフォルト: True  
+        print_flag: 進行状況を表示するフラグ. True: 表示 False: 非表示
+                    デフォルト: True
         戻り値: (x_train, y_train), (x_test, y_test)
         x_train: 学習に使用する画像データ(*,28,28,1) ndarray
         y_train: 学習に使用するラベル (*) ndarray
@@ -83,7 +94,7 @@ class np_load:
             # ラベルの作成
             classes = np.ones(shape=(train_samples+val_samples+test_samples), dtype=np.int32)
             classes *= values
-            if print_flag: 
+            if print_flag:
                 print(f"{keys}, {values} : train_shape {train.shape} val_shape {val.shape} test_shape {test.shape}")
             # 各戻り値に合うようにデータを追加する
             self.x_train = np.append(self.x_train, train.reshape((train_samples,) + self.X_DATA_SHAPE[1:]), axis=0)
@@ -101,7 +112,7 @@ class np_load:
         self.y_train = np.array(y_train)
         #print("np_load x", self.x_train.shape)
         #print("np_load y", self.y_train.shape)
-            
+
         return (self.x_train, self.y_train), (self.x_val, self.y_val), (self.x_test, self.y_test)
 
     def __search_files(self, print_flag=False):

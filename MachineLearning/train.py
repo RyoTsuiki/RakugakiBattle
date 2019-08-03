@@ -1,3 +1,8 @@
+"""
+非推奨
+学習するプログラム たしか直接実行すると動く
+np_load.py と依存関係がある
+"""
 import np_load
 import datetime
 from tensorflow.python.keras.utils import to_categorical

@@ -1,4 +1,10 @@
 # throw_request.py
+"""flask_project にデータを投げるプログラム.
+
+*もしエラーが出た場合, URL を確認すること*
+使用例はmain 関数を確認すること
+
+"""
 import urllib.request
 import urllib.parse
 import sys

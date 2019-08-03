@@ -1,3 +1,38 @@
+"""学習を行うプログラム.
+
+quick draw dataset を用いて学習を行うクラス
+このクラスを使用して学習を実行する(このプログラムだけでは学習しない)
+np_load_class.py を使用する
+np_load_class を使用するためには事前にデータを取得する必要がある
+もし, 異なるデータセットを使用する場合は, np_load_class を新たに作成すればよい
+同様の関数を作成すれば, ピクセル値(今回は28*28) が変更してもモデルを特に変更する必要はない(はず)
+
+実際に使用したコード(例)
+Colaboratory を使用
+
+# Google ドライブをマウントするには、このセルを実行してください。
+from google.colab import drive
+drive.mount('/content/gdrive')
+%cd "/content/gdrive/My Drive/Colab Notebooks/exp5"
+
+import sys
+sys.path.append("/content/gdrive/My Drive/Colab Notebooks/exp5/prog")
+import np_load_class as np
+import train_class as tr
+
+lr = [1e-5, 1e-2]
+data = np.np_load("/content/gdrive/My Drive/Colab Notebooks/exp5/top10/")
+data.load(train_samples=50000, val_samples=0, test_samples=10000)
+for i in lr:
+  cnn = tr.Train()
+  cnn.set_model_parameter(epochs=100, firstlr=i)
+  cnn.set_save_parameter(folder_name="class_10/" + str(i))
+  cnn.set_data(data)
+  cnn.train()
+  data.write_csv("class_10/" + str(i) + "/label.csv")
+"""
+
+
 import datetime
 import time
 from tensorflow.python.keras.utils import to_categorical
@@ -64,7 +99,7 @@ class Train:
             print("x_train.shape:", self.x_train.shape)
             print("x_val.shape:", self.x_val.shape)
             print("x_test.shape:", self.x_test.shape)
-            
+
             print("y_train.shape:", self.y_train.shape)
             print("y_val.shape:", self.y_val.shape)
             print("y_test.shape:", self.y_test.shape)
@@ -224,7 +259,7 @@ class Train:
             # 検証データとして使用するトレーニングデータの割合
             validation_split=self.split,
             # 検証用データの指定
-            validation_data=(self.x_val, self.y_val),
+            #validation_data=(self.x_val, self.y_val),
             # シャッフル
             shuffle=True,
             # 表示設定
